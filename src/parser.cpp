@@ -1,4 +1,5 @@
 #include <deque>
+#include <string>
 
 #include "./parser.h"
 #include "./token.h"
@@ -28,6 +29,12 @@ ValuePtr Parser::parse() {
         return std::make_shared<SymbolValue>(value);
     } else if (token->getType() == TokenType::LEFT_PAREN) {
         return parseTails();
+    } else if (token->getType() == TokenType::QUOTE) {
+        return parseQuote(std::string("quote"));
+    } else if (token->getType() == TokenType::QUASIQUOTE) {
+        return parseQuote(std::string("quasiquote"));
+    } else if (token->getType() == TokenType::UNQUOTE) {
+        return parseQuote(std::string("unquote"));
     } else {
         throw SyntaxError("Unimplemented.");
     }
@@ -69,4 +76,14 @@ ValuePtr Parser::parseTails() {
 
         return std::make_shared<PairValue>(car, cdr);
     }
+}
+
+ValuePtr Parser::parseQuote(const std::string& str) {
+    return std::make_shared<PairValue>(
+      std::make_shared<SymbolValue>(str),
+      std::make_shared<PairValue>(
+          this->parse(),
+          std::make_shared<NilValue>()
+      )
+    );
 }
