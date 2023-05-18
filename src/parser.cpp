@@ -23,7 +23,14 @@ ValuePtr Parser::parse() {
     } else if (token->getType() == TokenType::STRING_LITERAL) {
         auto value = static_cast<StringLiteralToken&>(*token).getValue();
         return std::make_shared<StringValue>(value);
+    } else if (token->getType() == TokenType::IDENTIFIER) {
+        auto value = static_cast<IdentifierToken&>(*token).getName();
+        return std::make_shared<SymbolValue>(value);
     } else {
         throw SyntaxError("Unimplemented");
     }
+}
+
+ValuePtr Parser::parseTails() {
+    
 }
