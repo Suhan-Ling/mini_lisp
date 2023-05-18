@@ -8,7 +8,7 @@ Parser::Parser(std::deque<TokenPtr> t) : tokens(std::move(t)) {}
 
 ValuePtr Parser::parse() {
     if (tokens.empty()) {
-        throw SyntaxError("Empty tokens");
+        throw SyntaxError("Empty tokens.");
     }
 
     auto token = std::move(tokens.front());
@@ -26,11 +26,47 @@ ValuePtr Parser::parse() {
     } else if (token->getType() == TokenType::IDENTIFIER) {
         auto value = static_cast<IdentifierToken&>(*token).getName();
         return std::make_shared<SymbolValue>(value);
+    } else if (token->getType() == TokenType::LEFT_PAREN) {
+        return parseTails();
     } else {
-        throw SyntaxError("Unimplemented");
+        throw SyntaxError("Unimplemented.");
     }
 }
 
 ValuePtr Parser::parseTails() {
-    
+    if (tokens.empty()) {
+        throw SyntaxError("Unexpected end of input.");
+    }
+
+    if (tokens.front()->getType() == TokenType::RIGHT_PAREN) {
+        tokens.pop_front();
+        return std::make_shared<NilValue>();
+    }
+
+    auto car = this->parse();
+
+    if (tokens.empty()) {
+        throw SyntaxError("Unexpected end of input.");
+    }
+
+    if (tokens.front()->getType() == TokenType::DOT) {
+        tokens.pop_front();
+
+        auto cdr = this->parse();
+
+        if (tokens.empty()) {
+            throw SyntaxError("Unexpected end of input.");
+        }
+
+        if (tokens.front()->getType() != TokenType::RIGHT_PAREN) {
+            throw SyntaxError("Expected ')' after '.'.");
+        }
+        tokens.pop_front();
+
+        return std::make_shared<PairValue>(car, cdr);
+    } else {
+        auto cdr = this->parse();
+
+        return std::make_shared<PairValue>(car, cdr);
+    }
 }
