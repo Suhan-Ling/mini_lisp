@@ -1,7 +1,10 @@
 #include <iostream>
 #include <string>
+#include <typeinfo>
 
 #include "./tokenizer.h"
+#include "./value.h"
+#include "./parse.h"
 
 int main() {
     while (true) {
@@ -13,9 +16,12 @@ int main() {
                 std::exit(0);
             }
             auto tokens = Tokenizer::tokenize(line);
-            for (auto& token : tokens) {
-                std::cout << *token << std::endl;
-            }
+            Parser parser(std::move(tokens)); // TokenPtr 不支持复制
+            auto value = parser.parse();
+            std::cout << value->toString() << std::endl; // 输出外部表示
+            // for (auto& token : tokens) {
+            //     std::cout << *token << std::endl;
+            // }
         } catch (std::runtime_error& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }

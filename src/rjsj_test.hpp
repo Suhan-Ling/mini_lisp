@@ -14,9 +14,7 @@
 #include <cmath>
 #if __has_include(<concepts>)
 #include <concepts>
-#if __cpp_lib_concepts >= 202002L
 #define RMLT_INTERNAL_CONCEPT_ENABLED
-#endif
 #endif
 #include <deque>
 #include <iomanip>
@@ -32,16 +30,8 @@
 #include <vector>
 
 #ifdef _WIN32
-#ifndef NOMINMAX
 #define NOMINMAX
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-// winnt.h defines TokenType, which conflicts with our TokenType.
-#define TokenType Win32TokenType
 #include <Windows.h>
-#undef TokenType
 #endif
 
 namespace rjsj_mini_lisp_test {
