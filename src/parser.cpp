@@ -1,10 +1,10 @@
 #include <deque>
 
-#include "./parse.h"
+#include "./parser.h"
 #include "./token.h"
 #include "./error.h"
 
-Parser::Parser(std::deque<TokenPtr> t) : tokens(t) {}
+Parser::Parser(std::deque<TokenPtr> t) : tokens(std::move(t)) {}
 
 ValuePtr Parser::parse() {
     if (tokens.empty()) {

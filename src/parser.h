@@ -1,9 +1,10 @@
-#ifndef PARSE_H
-#define PARSE_H
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <deque>
 
-#include "value.h"
+#include "./value.h"
+#include "./token.h"
 
 class Parser {
     std::deque<TokenPtr> tokens;
