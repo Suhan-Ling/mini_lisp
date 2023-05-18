@@ -72,7 +72,7 @@ ValuePtr Parser::parseTails() {
 
         return std::make_shared<PairValue>(car, cdr);
     } else {
-        auto cdr = this->parse();
+        auto cdr = this->parseTails();
 
         return std::make_shared<PairValue>(car, cdr);
     }
