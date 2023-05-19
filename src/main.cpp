@@ -35,7 +35,7 @@ int main() {
             auto value = parser.parse();
             EvalEnv env;
             auto result = env.eval(std::move(value));  
-            std::cout << value->toString() << std::endl;    // 输出外部表示
+            std::cout << result->toString() << std::endl;    // 输出外部表示
         } catch (std::runtime_error& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }

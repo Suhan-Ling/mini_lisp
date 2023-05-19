@@ -14,6 +14,10 @@ bool Value::isSelfEvaluating() {
     return  (typeid(*this) == typeid(BooleanValue)) or (typeid(*this) == typeid(NumericValue)) or (typeid(*this) == typeid(StringValue));
 } 
 
+std::vector<ValuePtr> Value::toVector() {
+    
+}
+
 std::string BooleanValue::toString() const {
     if (value) {
         return "#t";
