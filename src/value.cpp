@@ -4,6 +4,15 @@
 #include <cmath>
 #include <typeinfo>
 #include <iostream>
+#include <typeinfo>
+
+bool Value::isNil() {
+    return (typeid(*this) == typeid(NilValue));
+}
+
+bool Value::isSelfEvaluating() {
+    return  (typeid(*this) == typeid(BooleanValue)) or (typeid(*this) == typeid(NumericValue)) or (typeid(*this) == typeid(StringValue));
+} 
 
 std::string BooleanValue::toString() const {
     if (value) {

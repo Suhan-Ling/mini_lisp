@@ -12,6 +12,8 @@ class Value {
 public:
     virtual ~Value() = default;
     virtual std::string toString() const = 0;
+    bool isNil();
+    bool isSelfEvaluating();
 };
 
 class BooleanValue: public Value {
