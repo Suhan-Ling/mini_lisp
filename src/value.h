@@ -5,6 +5,7 @@
 #include <memory>
 #include <typeinfo>
 #include <vector>
+#include <functional>
 
 class Value;
 using ValuePtr = std::shared_ptr<Value>;
@@ -15,7 +16,9 @@ public:
     virtual std::string toString() const = 0;
     bool isNil();
     bool isSelfEvaluating();
+    bool isList();
     std::vector<ValuePtr> toVector();
+    std::optional<std::string> asSymbol();
 };
 
 class BooleanValue: public Value {

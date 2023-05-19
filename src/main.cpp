@@ -33,6 +33,7 @@ int main() {
             auto tokens = Tokenizer::tokenize(line);
             Parser parser(std::move(tokens));               // TokenPtr 不支持复制
             auto value = parser.parse();
+            // std::cout << value->toString() << std::endl;
             EvalEnv env;
             auto result = env.eval(std::move(value));  
             std::cout << result->toString() << std::endl;    // 输出外部表示

@@ -1,10 +1,12 @@
 #include "./value.h"
+#include "./error.h"
 
 #include <iomanip>
 #include <cmath>
 #include <typeinfo>
 #include <iostream>
 #include <typeinfo>
+#include <functional>
 
 bool Value::isNil() {
     return (typeid(*this) == typeid(NilValue));
@@ -14,8 +16,27 @@ bool Value::isSelfEvaluating() {
     return  (typeid(*this) == typeid(BooleanValue)) or (typeid(*this) == typeid(NumericValue)) or (typeid(*this) == typeid(StringValue));
 } 
 
+bool Value::isList() {
+    return (typeid(*this) == typeid(PairValue));
+}
+
 std::vector<ValuePtr> Value::toVector() {
-    
+    if (typeid(*this) == typeid(PairValue)) {
+        std::vector<ValuePtr> result;
+        result.push_back(left);
+        result.push_back(right);
+        return result;
+    } else {
+        throw LispError("Value is not a list.");
+    }
+}
+
+std::optional<std::string> Value::asSymbol() {
+    if (typeid(*this) == typeid(SymbolValue)) {
+        return name;
+    } else {
+        return std::nullopt;
+    }
 }
 
 std::string BooleanValue::toString() const {
@@ -45,7 +66,7 @@ std::string NilValue::toString() const {
 }
 
 std::string SymbolValue::toString() const {
-    return name;
+    return name;    
 }
 
 static int PairValue_toString_layer = 0;
@@ -66,6 +87,7 @@ std::string PairValue::toString() const {
     if (PairValue_toString_layer) {
         return result;
     } else {
+        printf("111\n");
         return "(" + result + ")";
     }
 }
