@@ -10,7 +10,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
     } else if (expr->isNil()) {
         throw LispError("Evaluating nil is prohibited.");
     } else if (auto name = expr->asSymbol()) {
-        if (auto value = 符号表.查找(*name)) {
+        if (auto value = symbolTable[*name]) {
             return value;
         } else {
             throw LispError("Variable " + *name + " not defined.");
@@ -18,11 +18,14 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
     } else if (expr->isList()) {
         std::vector<ValuePtr> v = expr->toVector();
         if (v[0]->asSymbol() == "define"s) {
-        if (auto name = v[1]->asSymbol()) {
-            将 (*name, v[2]) 添加到符号表中;
-            return 空表;
+            if (auto name = v[1]->asSymbol()) {
+                symbolTable[*name] = eval(v[2]);
+                return std::make_shared<NilValue>();
+            } else {
+                throw LispError("Malformed define.");
+            }
         } else {
-            throw LispError("Malformed define.");
+            throw LispError("Unimplemented");
         }
     } else {
         throw LispError("Unimplemented");

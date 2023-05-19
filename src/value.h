@@ -5,7 +5,7 @@
 #include <memory>
 #include <typeinfo>
 #include <vector>
-#include <functional>
+#include <optional>
 
 class Value;
 using ValuePtr = std::shared_ptr<Value>;
@@ -14,11 +14,11 @@ class Value {
 public:
     virtual ~Value() = default;
     virtual std::string toString() const = 0;
-    bool isNil();
-    bool isSelfEvaluating();
-    bool isList();
-    std::vector<ValuePtr> toVector();
-    std::optional<std::string> asSymbol();
+    bool isNil() const;
+    bool isSelfEvaluating() const;
+    bool isList() const;
+    virtual std::vector<ValuePtr> toVector() const;
+    virtual std::optional<std::string> asSymbol() const;
 };
 
 class BooleanValue: public Value {
@@ -58,6 +58,7 @@ public:
     SymbolValue(const std::string& val): name(val) {}
     ~SymbolValue() {}
     std::string toString() const override;
+    std::optional<std::string> asSymbol() const;
 };
 
 class PairValue: public Value {
@@ -68,6 +69,7 @@ public:
         left(std::move(l)), right(std::move(r)) {}
     ~PairValue() {}
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const;
 };
 
 #endif

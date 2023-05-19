@@ -8,35 +8,24 @@
 #include <typeinfo>
 #include <functional>
 
-bool Value::isNil() {
+bool Value::isNil() const {
     return (typeid(*this) == typeid(NilValue));
 }
 
-bool Value::isSelfEvaluating() {
+bool Value::isSelfEvaluating() const {
     return  (typeid(*this) == typeid(BooleanValue)) or (typeid(*this) == typeid(NumericValue)) or (typeid(*this) == typeid(StringValue));
 } 
 
-bool Value::isList() {
+bool Value::isList() const {
     return (typeid(*this) == typeid(PairValue));
 }
 
-std::vector<ValuePtr> Value::toVector() {
-    if (typeid(*this) == typeid(PairValue)) {
-        std::vector<ValuePtr> result;
-        result.push_back(left);
-        result.push_back(right);
-        return result;
-    } else {
-        throw LispError("Value is not a list.");
-    }
+std::vector<ValuePtr> Value::toVector() const {
+    throw LispError("Value is not a list.");
 }
 
-std::optional<std::string> Value::asSymbol() {
-    if (typeid(*this) == typeid(SymbolValue)) {
-        return name;
-    } else {
-        return std::nullopt;
-    }
+std::optional<std::string> Value::asSymbol() const {
+    return std::nullopt;
 }
 
 std::string BooleanValue::toString() const {
@@ -69,6 +58,10 @@ std::string SymbolValue::toString() const {
     return name;    
 }
 
+std::optional<std::string> SymbolValue::asSymbol() const {
+    return name;
+}
+
 static int PairValue_toString_layer = 0;
 
 std::string PairValue::toString() const {
@@ -90,4 +83,18 @@ std::string PairValue::toString() const {
         printf("111\n");
         return "(" + result + ")";
     }
+}
+
+std::vector<ValuePtr> PairValue::toVector() const {
+    std::vector<ValuePtr> result, r;
+    result.push_back(left);
+    if (right->isList()) {
+        r = right->toVector();
+        for (auto i: r) {
+            result.push_back(i);
+        }
+    } else {
+        result.push_back(right);
+    }
+    return result;
 }
