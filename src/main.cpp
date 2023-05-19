@@ -6,7 +6,9 @@
 #include "./value.h"
 #include "./parser.h"
 
-// #include "rjsj_test.hpp"
+#include "rjsj_test.hpp"
+
+#define RJSJ_TEST_NO_EXIT
 
 struct TestCtx {
     std::string eval(std::string input) {
@@ -18,7 +20,7 @@ struct TestCtx {
 };
 
 int main() {
-    // RJSJ_TEST(TestCtx, Lv2, Lv2Only);
+    RJSJ_TEST(TestCtx, Lv2, Lv2Only);
     while (true) {
         try {
             std::cout << ">>> " ;
