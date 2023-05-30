@@ -6,6 +6,7 @@
 #include "./value.h"
 #include "./parser.h"
 #include "./eval_env.h"
+#include "./builtins.h"
 
 #include "rjsj_test.hpp"
 

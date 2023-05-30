@@ -1,14 +1,12 @@
 #include "./value.h"
 #include "./error.h"
 
-
 #include <iomanip>
 #include <cmath>
 #include <typeinfo>
 #include <iostream>
 #include <typeinfo>
 #include <functional>
-
 
 bool Value::isNil() const {
     return (typeid(*this) == typeid(NilValue));
@@ -41,7 +39,6 @@ int Value::asNumber() const {
     throw LispError("Not a number.");
 }
 
-
 std::string BooleanValue::toString() const {
     if (value) {
         return "#t";
@@ -49,7 +46,6 @@ std::string BooleanValue::toString() const {
         return "#f";
     }
 }
-
 
 std::string NumericValue::toString() const {
     if (std::floor(value) == value) {
@@ -59,18 +55,15 @@ std::string NumericValue::toString() const {
     }
 }
 
-
 std::string StringValue::toString() const {
     std::stringstream ss;
     ss << std::quoted(value);
     return ss.str();
 }
 
-
 std::string NilValue::toString() const {
     return "()";
 }
-
 
 std::string SymbolValue::toString() const {
     return name;    
@@ -79,7 +72,6 @@ std::string SymbolValue::toString() const {
 std::optional<std::string> SymbolValue::asSymbol() const {
     return name;
 }
-
 
 static int PairValue_toString_layer = 0;
 

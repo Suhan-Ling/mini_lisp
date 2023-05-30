@@ -1,6 +1,10 @@
-#include "./builtins.h"
 #include "./value.h"
 #include "./error.h"
+#include "./builtins.h"
+
+void addTable(std::unordered_map<std::string, ValuePtr> t, std::string s, BuiltinFuncType* f) {
+    t[s] = std::make_shared<BuiltinProcValue>(f);
+}
 
 ValuePtr add(const std::vector<ValuePtr>& params) {
     int result = 0;
