@@ -1,6 +1,7 @@
 #include "./value.h"
 #include "./error.h"
 
+
 #include <iomanip>
 #include <cmath>
 #include <typeinfo>
@@ -8,25 +9,38 @@
 #include <typeinfo>
 #include <functional>
 
+
 bool Value::isNil() const {
     return (typeid(*this) == typeid(NilValue));
 }
 
 bool Value::isSelfEvaluating() const {
-    return  (typeid(*this) == typeid(BooleanValue)) or (typeid(*this) == typeid(NumericValue)) or (typeid(*this) == typeid(StringValue));
-} 
+    return (typeid(*this) == typeid(BooleanValue)) or
+           (typeid(*this) == typeid(NumericValue)) or
+           (typeid(*this) == typeid(StringValue)) or
+           (typeid(*this) == typeid(BuiltinProcValue));
+}
 
 bool Value::isList() const {
     return (typeid(*this) == typeid(PairValue));
 }
 
+bool Value::isNumber() const {
+    return (typeid(*this) == typeid(NumericValue));
+}
+
 std::vector<ValuePtr> Value::toVector() const {
-    throw LispError("Value is not a list.");
+    throw LispError("Cannot convert to vector.");
 }
 
 std::optional<std::string> Value::asSymbol() const {
     return std::nullopt;
 }
+
+int Value::asNumber() const {
+    throw LispError("Not a number.");
+}
+
 
 std::string BooleanValue::toString() const {
     if (value) {
@@ -36,6 +50,7 @@ std::string BooleanValue::toString() const {
     }
 }
 
+
 std::string NumericValue::toString() const {
     if (std::floor(value) == value) {
         return std::to_string(static_cast<int>(value));
@@ -44,15 +59,18 @@ std::string NumericValue::toString() const {
     }
 }
 
+
 std::string StringValue::toString() const {
     std::stringstream ss;
     ss << std::quoted(value);
     return ss.str();
 }
 
+
 std::string NilValue::toString() const {
     return "()";
 }
+
 
 std::string SymbolValue::toString() const {
     return name;    
@@ -61,6 +79,7 @@ std::string SymbolValue::toString() const {
 std::optional<std::string> SymbolValue::asSymbol() const {
     return name;
 }
+
 
 static int PairValue_toString_layer = 0;
 
@@ -97,4 +116,9 @@ std::vector<ValuePtr> PairValue::toVector() const {
         result.push_back(right);
     }
     return result;
+}
+
+
+std::string BuiltinProcValue::toString() const {
+    return "#<procedure>"; 
 }

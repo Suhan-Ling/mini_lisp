@@ -1,8 +1,13 @@
 #include "./eval_env.h"
 #include "./error.h"
 #include "./value.h"
+#include "./builtins.h"
 
 using namespace std::literals;
+
+EvalEnv::EvalEnv() {
+    symbolTable["+"] = std::make_shared<BuiltinProcValue>(&add);
+}
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     if (expr->isSelfEvaluating()) {
