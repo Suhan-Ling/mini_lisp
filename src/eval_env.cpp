@@ -48,13 +48,13 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             }
         } else {
             ValuePtr proc = this->eval(v[0]);
-            // std::cout << "eval" << std::endl;
+            // std::cout << "eval:" << std::endl;
             // std::cout << v.size() << std::endl;
             // for (auto i: v) {
             //     std::cout << i->toString() << std::endl;
             // }
             // std::cout << std::endl;
-            std::cout << expr->getRight()->toString() << std::endl;
+            // std::cout << expr->getRight()->toString() << std::endl << std::endl;
             std::vector<ValuePtr> args = evalList(expr->getRight());
             return this->apply(proc, args);
         }

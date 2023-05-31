@@ -140,9 +140,9 @@ std::string PairValue::getType() const {
 std::vector<ValuePtr> PairValue::toVector() const {
     std::vector<ValuePtr> result, r;
     result.push_back(left);
-    // std::cout << "toVector" << std::endl;
+    // std::cout << "toVector:" << std::endl;
     // std::cout << left->toString() << ' ' << right->toString() << std::endl;
-    // std::cout << right->getType() << ' ' << right->isPair()() << ' ' << (right->getType() != "NilValue") << std::endl;
+    // std::cout << right->getType() << std::endl;
     // std::cout << std::endl;
     if (right->isPair()) {
         r = right->toVector();
