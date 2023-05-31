@@ -21,7 +21,7 @@ public:
 
     bool isNil() const;
     bool isSelfEvaluating() const;
-    bool isList() const;
+    bool isPair() const;
     bool isNumber() const;
 
     virtual std::vector<ValuePtr> toVector() const;

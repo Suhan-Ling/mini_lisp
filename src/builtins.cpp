@@ -3,6 +3,8 @@
 #include "./builtins.h"
 
 #include <iostream>
+#include <cmath>
+#include <string>
 
 ValuePtr print(const std::vector<ValuePtr>& params) {
     for (const auto& i: params) {
@@ -12,7 +14,7 @@ ValuePtr print(const std::vector<ValuePtr>& params) {
 }
 
 ValuePtr atom_(const std::vector<ValuePtr>& params) {
-    boolean b;
+    bool b;
     b = (params[0]->getType() == "BooleanValue") or
         (params[0]->getType() == "NumericValue") or
         (params[0]->getType() == "StringValue") or
@@ -26,28 +28,41 @@ ValuePtr boolean_(const std::vector<ValuePtr>& params) {
 }
 
 ValuePtr integer_(const std::vector<ValuePtr>& params) {
-    
+    bool b;
+    b = (params[0]->getType() == "NumericValue") and 
+        (params[0]->asNumber() == std::floor(params[0]->asNumber()));
+    return std::make_shared<BooleanValue>(b);
 }
 
-ValuePtr list_(const std::vector<ValuePtr>& params);
+ValuePtr number_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "NumericValue");
+}
 
-ValuePtr number_(const std::vector<ValuePtr>& params);
+ValuePtr null_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "NilValue");
+}
 
-ValuePtr null_(const std::vector<ValuePtr>& params);
+ValuePtr pair_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "PairValue");
+}
 
-ValuePtr pair_(const std::vector<ValuePtr>& params);
+ValuePtr procedure_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "BuiltinProcValue");
+}
 
-ValuePtr procedure_(const std::vector<ValuePtr>& params);
+ValuePtr string_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "StringValue");
+}
 
-ValuePtr string_(const std::vector<ValuePtr>& params);
-
-ValuePtr symbol_(const std::vector<ValuePtr>& params);
+ValuePtr symbol_(const std::vector<ValuePtr>& params) {
+    return std::make_shared<BooleanValue>(params[0]->getType() == "SymbolValue");
+}
 
 ValuePtr add(const std::vector<ValuePtr>& params) {
     int result = 0;
     for (const auto& i : params) {
         if (!i->isNumber()) {
-            throw LispError("Cannot add a non-numeric value.");
+            throw LispError(i->toString() + " is nut number.");
         }
         result += i->asNumber();
     }
@@ -55,12 +70,58 @@ ValuePtr add(const std::vector<ValuePtr>& params) {
 }
 
 ValuePtr substract(const std::vector<ValuePtr>& params) {
-    int result = 0;
+    int len = params.size();
+    if (len == 2) {
+        if (!params[0]->isNumber()) {
+            throw LispError(params[0]->toString() + " is nut number.");
+        } else if (!params[1]->isNumber()) {
+            throw LispError(params[1]->toString() + " is nut number.");
+        }
+        return std::make_shared<NumericValue>(params[0]->asNumber() - params[1]->asNumber());
+    } else if (len == 1) {
+        if (!params[0]->isNumber()) {
+            throw LispError(params[0]->toString() + " is nut number.");
+        }
+        return std::make_shared<NumericValue>(0 - params[0]->asNumber());
+    } else if (len > 2) {
+        throw LispError("Too many arguments: " + std::to_string(len) + " > 2.");
+    } else {    // len == 0
+        throw LispError("Too few arguments: 0 < 1.");
+    }
+}
+
+ValuePtr multiply(const std::vector<ValuePtr>& params) {
+    int result = 1;
     for (const auto& i : params) {
         if (!i->isNumber()) {
-            throw LispError("Cannot substract a non-numeric value.");
+            throw LispError(i->toString() + " is nut number.");
         }
-        result -= i->asNumber();
+        result *= i->asNumber();
     }
     return std::make_shared<NumericValue>(result);
+}
+
+ValuePtr divide(const std::vector<ValuePtr>& params) {
+    int len = params.size();
+    if (len == 2) {
+        if (!params[0]->isNumber()) {
+            throw LispError(params[0]->toString() + " is nut number.");
+        } else if (!params[1]->isNumber()) {
+            throw LispError(params[1]->toString() + " is nut number.");
+        } else if (params[1]->asNumber() == 0) {
+            throw LispError("Cannot divide 0.");
+        }
+        return std::make_shared<NumericValue>(params[0]->asNumber() / params[1]->asNumber());
+    } else if (len == 1) {
+        if (!params[0]->isNumber()) {
+            throw LispError(params[0]->toString() + " is nut number.");
+        } else if (params[0]->asNumber() == 0) {
+            throw LispError("Cannot divide 0.");
+        }
+        return std::make_shared<NumericValue>(1 / params[0]->asNumber());
+    } else if (len > 2) {
+        throw LispError("Too many arguments: " + std::to_string(len) + " > 2.");
+    } else {    // len == 0
+        throw LispError("Too few arguments: 0 < 1.");
+    }
 }

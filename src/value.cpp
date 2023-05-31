@@ -19,7 +19,7 @@ bool Value::isSelfEvaluating() const {
            (typeid(*this) == typeid(BuiltinProcValue));
 }
 
-bool Value::isList() const {
+bool Value::isPair() const {
     return (typeid(*this) == typeid(PairValue));
 }
 
@@ -142,11 +142,11 @@ std::vector<ValuePtr> PairValue::toVector() const {
     result.push_back(left);
     // std::cout << "toVector" << std::endl;
     // std::cout << left->toString() << ' ' << right->toString() << std::endl;
-    // std::cout << right->getType() << ' ' << right->isList() << ' ' << (right->getType() != "NilValue") << std::endl;
+    // std::cout << right->getType() << ' ' << right->isPair()() << ' ' << (right->getType() != "NilValue") << std::endl;
     // std::cout << std::endl;
-    if (right->isList()) {
+    if (right->isPair()) {
         r = right->toVector();
-        // std::cout << "isList" << std::endl;
+        // std::cout << "isPair()" << std::endl;
         // std::cout << r.size() << std::endl;
         // for (auto i: r) {
         //     std::cout << i->toString() << std::endl;

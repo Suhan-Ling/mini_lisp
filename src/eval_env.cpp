@@ -10,9 +10,20 @@
 using namespace std::literals;
 
 EvalEnv::EvalEnv() {
-    symbolTable["print"] = std::make_shared<BuiltinProcValue>(&print);
-    symbolTable["+"] = std::make_shared<BuiltinProcValue>(&add);
-    symbolTable["-"] = std::make_shared<BuiltinProcValue>(&substract);
+    symbolTable["print"]        = std::make_shared<BuiltinProcValue>(&print);
+    symbolTable["atom?"]        = std::make_shared<BuiltinProcValue>(&atom_);
+    symbolTable["boolean?"]     = std::make_shared<BuiltinProcValue>(&boolean_);
+    symbolTable["integer?"]     = std::make_shared<BuiltinProcValue>(&integer_);
+    symbolTable["number?"]      = std::make_shared<BuiltinProcValue>(&number_);
+    symbolTable["null?"]        = std::make_shared<BuiltinProcValue>(&null_);
+    symbolTable["pair?"]        = std::make_shared<BuiltinProcValue>(&pair_);
+    symbolTable["procedure?"]   = std::make_shared<BuiltinProcValue>(&procedure_);
+    symbolTable["string?"]      = std::make_shared<BuiltinProcValue>(&string_);
+    symbolTable["symbol?"]      = std::make_shared<BuiltinProcValue>(&symbol_);
+    symbolTable["+"]            = std::make_shared<BuiltinProcValue>(&add);
+    symbolTable["-"]            = std::make_shared<BuiltinProcValue>(&substract);
+    symbolTable["*"]            = std::make_shared<BuiltinProcValue>(&multiply);
+    symbolTable["/"]            = std::make_shared<BuiltinProcValue>(&divide);
 }
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
@@ -26,7 +37,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         } else {
             throw LispError("Variable " + *name + " not defined.");
         }
-    } else if (expr->isList()) {
+    } else if (expr->isPair()) {
         std::vector<ValuePtr> v = expr->toVector();
         if (v[0]->asSymbol() == "define"s) {
             if (auto name = v[1]->asSymbol()) {
