@@ -54,6 +54,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             //     std::cout << i->toString() << std::endl;
             // }
             // std::cout << std::endl;
+            std::cout << expr->getRight()->toString() << std::endl;
             std::vector<ValuePtr> args = evalList(expr->getRight());
             return this->apply(proc, args);
         }

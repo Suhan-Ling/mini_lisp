@@ -7,6 +7,7 @@
 #include "./parser.h"
 #include "./eval_env.h"
 #include "./builtins.h"
+#include "./forms.h"
 
 #include "rjsj_test.hpp"
 
