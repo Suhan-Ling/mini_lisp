@@ -26,7 +26,10 @@ public:
 
     virtual std::vector<ValuePtr> toVector() const;
     virtual std::optional<std::string> asSymbol() const;
-    virtual int asNumber() const;
+    virtual double asNumber() const;
+    virtual ValuePtr getRight();
+    virtual ValuePtr apply(std::vector<ValuePtr> args);
+    virtual std::string getType() const = 0;
 };
 
 
@@ -37,6 +40,7 @@ public:
     BooleanValue(bool val): value{val} {}
     ~BooleanValue() {}
     std::string toString() const override;
+    std::string getType() const override;
 };
 
 
@@ -47,6 +51,8 @@ public:
     NumericValue(double val): value{val} {}
     ~NumericValue() {}
     std::string toString() const override;
+    std::string getType() const override;
+    double asNumber() const;
 };
 
 
@@ -57,6 +63,7 @@ public:
     StringValue(const std::string& val): value(val) {}
     ~StringValue() {}
     std::string toString() const override;
+    std::string getType() const override;
 };
 
 
@@ -65,6 +72,8 @@ public:
     NilValue() = default;
     ~NilValue() {}
     std::string toString() const override;
+    std::string getType() const override;
+    std::vector<ValuePtr> toVector() const;
 };
 
 class SymbolValue: public Value {
@@ -74,6 +83,7 @@ public:
     SymbolValue(const std::string& val): name(val) {}
     ~SymbolValue() {}
     std::string toString() const override;
+    std::string getType() const override;
     std::optional<std::string> asSymbol() const;
 };
 
@@ -87,7 +97,9 @@ public:
         left(std::move(l)), right(std::move(r)) {}
     ~PairValue() {}
     std::string toString() const override;
+    std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
+    ValuePtr getRight();
 };
 
 
@@ -97,6 +109,8 @@ class BuiltinProcValue : public Value {
 public:
     BuiltinProcValue(BuiltinFuncType* f): func(f) {}
     std::string toString() const override;
+    std::string getType() const override;
+    ValuePtr apply(std::vector<ValuePtr> args);
 };
 
 

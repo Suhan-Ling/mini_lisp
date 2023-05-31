@@ -3,11 +3,16 @@
 #include "./eval_env.h"
 #include "./builtins.h"
 
+#include <algorithm>
+#include <iterator>
+#include <iostream>
+
 using namespace std::literals;
 
 EvalEnv::EvalEnv() {
+    symbolTable["print"] = std::make_shared<BuiltinProcValue>(&print);
     symbolTable["+"] = std::make_shared<BuiltinProcValue>(&add);
-    // addTable(symbolTable, "+", &add);
+    symbolTable["-"] = std::make_shared<BuiltinProcValue>(&substract);
 }
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
@@ -31,9 +36,33 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 throw LispError("Malformed define.");
             }
         } else {
-            throw LispError("Unimplemented");
+            ValuePtr proc = this->eval(v[0]);
+            // std::cout << "eval" << std::endl;
+            // std::cout << v.size() << std::endl;
+            // for (auto i: v) {
+            //     std::cout << i->toString() << std::endl;
+            // }
+            // std::cout << std::endl;
+            std::vector<ValuePtr> args = evalList(expr->getRight());
+            return this->apply(proc, args);
         }
     } else {
         throw LispError("Unimplemented");
     }
+}
+
+ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        return proc->apply(args);
+    } else {
+        throw LispError("Unimplemented");
+    }
+}
+
+std::vector<ValuePtr> EvalEnv::evalList(ValuePtr expr) {
+    std::vector<ValuePtr> result;
+    std::ranges::transform(expr->toVector(),
+                           std::back_inserter(result),
+                           [this](ValuePtr v) { return this->eval(v); });
+    return result;
 }

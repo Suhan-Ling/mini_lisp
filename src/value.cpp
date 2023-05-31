@@ -35,8 +35,16 @@ std::optional<std::string> Value::asSymbol() const {
     return std::nullopt;
 }
 
-int Value::asNumber() const {
+double Value::asNumber() const {
     throw LispError("Not a number.");
+}
+
+ValuePtr Value::getRight() {
+    throw LispError("Not a pair value.");
+}
+
+ValuePtr Value::apply(std::vector<ValuePtr> args) {
+    throw LispError("Not a builtin procedure.");
 }
 
 std::string BooleanValue::toString() const {
@@ -47,6 +55,10 @@ std::string BooleanValue::toString() const {
     }
 }
 
+std::string BooleanValue::getType() const {
+    return "BooleanValue";
+}
+
 std::string NumericValue::toString() const {
     if (std::floor(value) == value) {
         return std::to_string(static_cast<int>(value));
@@ -55,14 +67,35 @@ std::string NumericValue::toString() const {
     }
 }
 
+std::string NumericValue::getType() const {
+    return "NumericValue";
+}
+
+double NumericValue::asNumber() const {
+    return value;
+}
+
 std::string StringValue::toString() const {
     std::stringstream ss;
     ss << std::quoted(value);
     return ss.str();
 }
 
+std::string StringValue::getType() const {
+    return "StringValue";
+}
+
 std::string NilValue::toString() const {
     return "()";
+}
+
+std::string NilValue::getType() const {
+    return "NilValue";
+}
+
+std::vector<ValuePtr> NilValue::toVector() const {
+    std::vector<ValuePtr> v;
+    return v;
 }
 
 std::string SymbolValue::toString() const {
@@ -71,6 +104,10 @@ std::string SymbolValue::toString() const {
 
 std::optional<std::string> SymbolValue::asSymbol() const {
     return name;
+}
+
+std::string SymbolValue::getType() const {
+    return "SymbolValue";
 }
 
 static int PairValue_toString_layer = 0;
@@ -91,26 +128,53 @@ std::string PairValue::toString() const {
     if (PairValue_toString_layer) {
         return result;
     } else {
-        printf("111\n");
+        // printf("111\n");
         return "(" + result + ")";
     }
+}
+
+std::string PairValue::getType() const {
+    return "PairValue";
 }
 
 std::vector<ValuePtr> PairValue::toVector() const {
     std::vector<ValuePtr> result, r;
     result.push_back(left);
+    // std::cout << "toVector" << std::endl;
+    // std::cout << left->toString() << ' ' << right->toString() << std::endl;
+    // std::cout << right->getType() << ' ' << right->isList() << ' ' << (right->getType() != "NilValue") << std::endl;
+    // std::cout << std::endl;
     if (right->isList()) {
         r = right->toVector();
+        // std::cout << "isList" << std::endl;
+        // std::cout << r.size() << std::endl;
+        // for (auto i: r) {
+        //     std::cout << i->toString() << std::endl;
+        // }
+        // std::cout << std::endl;
         for (auto i: r) {
             result.push_back(i);
         }
-    } else {
+    } else if (right->getType() != "NilValue") {
+        // std::cout << "Not NilValue" << std::endl;
         result.push_back(right);
     }
     return result;
 }
 
+ValuePtr PairValue::getRight() {
+    return right;
+}
+
 
 std::string BuiltinProcValue::toString() const {
     return "#<procedure>"; 
+}
+
+std::string BuiltinProcValue::getType() const {
+    return "BuiltinProcValue";
+}
+
+ValuePtr BuiltinProcValue::apply(std::vector<ValuePtr> args) {
+    return func(args);
 }
