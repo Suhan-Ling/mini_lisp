@@ -1,23 +1,26 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
 
-#include <unordered_map>
-
 #include "./value.h"
 
-ValuePtr print(     const std::vector<ValuePtr>& params);
-ValuePtr atom_(     const std::vector<ValuePtr>& params);
-ValuePtr boolean_(  const std::vector<ValuePtr>& params);
-ValuePtr integer_(  const std::vector<ValuePtr>& params);
-ValuePtr number_(   const std::vector<ValuePtr>& params);
-ValuePtr null_(     const std::vector<ValuePtr>& params);
-ValuePtr pair_(     const std::vector<ValuePtr>& params);
-ValuePtr procedure_(const std::vector<ValuePtr>& params);
-ValuePtr string_(   const std::vector<ValuePtr>& params);
-ValuePtr symbol_(   const std::vector<ValuePtr>& params);
-ValuePtr add(       const std::vector<ValuePtr>& params);
-ValuePtr substract( const std::vector<ValuePtr>& params);
-ValuePtr multiply(  const std::vector<ValuePtr>& params);
-ValuePtr divide(    const std::vector<ValuePtr>& params);
+#include <unordered_map>
+#include <string>
+
+extern const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROC;
+
+BuiltinFuncType print;
+BuiltinFuncType atom_;
+BuiltinFuncType boolean_;
+BuiltinFuncType integer_;
+BuiltinFuncType number_;
+BuiltinFuncType null_;
+BuiltinFuncType pair_;
+BuiltinFuncType procedure_;
+BuiltinFuncType string_;
+BuiltinFuncType symbol_;
+BuiltinFuncType add;
+BuiltinFuncType substract;
+BuiltinFuncType multiply;
+BuiltinFuncType divide;
 
 #endif

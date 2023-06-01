@@ -13,6 +13,7 @@ public:
     ValuePtr eval(ValuePtr expr);
     ValuePtr apply(ValuePtr proc, std::vector<ValuePtr> args);
     std::vector<ValuePtr> evalList(ValuePtr expr);
+    void addSymbol(std::string name, ValuePtr v);
 };
 
 #endif

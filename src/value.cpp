@@ -39,7 +39,11 @@ double Value::asNumber() const {
     throw LispError("Not a number.");
 }
 
-ValuePtr Value::getRight() {
+ValuePtr Value::getCar() {
+    throw LispError("Not a pair value.");
+}
+
+ValuePtr Value::getCdr() {
     throw LispError("Not a pair value.");
 }
 
@@ -162,7 +166,11 @@ std::vector<ValuePtr> PairValue::toVector() const {
     return result;
 }
 
-ValuePtr PairValue::getRight() {
+ValuePtr PairValue::getCar() {
+    return left;
+}
+
+ValuePtr PairValue::getCdr() {
     return right;
 }
 

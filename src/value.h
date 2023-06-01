@@ -27,7 +27,8 @@ public:
     virtual std::vector<ValuePtr> toVector() const;
     virtual std::optional<std::string> asSymbol() const;
     virtual double asNumber() const;
-    virtual ValuePtr getRight();
+    virtual ValuePtr getCar();
+    virtual ValuePtr getCdr();
     virtual ValuePtr apply(std::vector<ValuePtr> args);
     virtual std::string getType() const = 0;
 };
@@ -99,7 +100,8 @@ public:
     std::string toString() const override;
     std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
-    ValuePtr getRight();
+    ValuePtr getCar();
+    ValuePtr getCdr();
 };
 
 

@@ -5,6 +5,24 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <unordered_map>
+
+const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROC = {
+    {"print",       &print},
+    {"atom?",       &atom_},
+    {"boolean?",    &boolean_},
+    {"integer?",    &integer_},
+    {"number?",     &number_},
+    {"null?",       &null_},
+    {"pair?",       &pair_},
+    {"procedure?",  &procedure_},
+    {"string?",     &string_},
+    {"symbol?",     &symbol_},
+    {"+",           &add},
+    {"-",           &substract},
+    {"*",           &multiply}, 
+    {"/",           &divide}
+};
 
 ValuePtr print(const std::vector<ValuePtr>& params) {
     for (const auto& i: params) {
