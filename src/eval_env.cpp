@@ -29,35 +29,19 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             throw LispError("Variable " + *name + " not defined.");
         }
     } else if (expr->isPair()) {
-        // std::vector<ValuePtr> v = expr->toVector();
-        // if (v[0]->asSymbol() == "define"s) {
-        //     if (auto name = v[1]->asSymbol()) {
-        //         symbolTable[*name] = eval(v[2]);
-        //         return std::make_shared<NilValue>();
-        //     } else {
-        //         throw LispError("Malformed define.");
-        //     }
         if (auto name = expr->getCar()->asSymbol()) {
             if (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end()) {
-                auto func = *SPECIAL_FORMS.find(*name);
-                // return SPECIAL_FORMS[*name](expr->getCdr()->toVector(), *this);
-                return func(expr->getCdr()->toVector(), *this);
+                return SPECIAL_FORMS[*name](expr->getCdr()->toVector(), *this);
             }
         } else {
             ValuePtr proc = this->eval(expr->getCar());
-            // std::cout << "eval:" << std::endl;
-            // std::cout << v.size() << std::endl;
-            // for (auto i: v) {
-            //     std::cout << i->toString() << std::endl;
-            // }
-            // std::cout << std::endl;
-            // std::cout << expr->getCdr()->toString() << std::endl << std::endl;
             std::vector<ValuePtr> args = evalList(expr->getCdr());
             return this->apply(proc, args);
         }
     } else {
         throw LispError("Unimplemented");
     }
+    return std::make_shared<NilValue>();    // make gcc happy
 }
 
 ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {

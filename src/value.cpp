@@ -39,11 +39,11 @@ double Value::asNumber() const {
     throw LispError("Not a number.");
 }
 
-ValuePtr Value::getCar() {
+ValuePtr Value::getCar() const {
     throw LispError("Not a pair value.");
 }
 
-ValuePtr Value::getCdr() {
+ValuePtr Value::getCdr() const {
     throw LispError("Not a pair value.");
 }
 
@@ -144,33 +144,22 @@ std::string PairValue::getType() const {
 std::vector<ValuePtr> PairValue::toVector() const {
     std::vector<ValuePtr> result, r;
     result.push_back(left);
-    // std::cout << "toVector:" << std::endl;
-    // std::cout << left->toString() << ' ' << right->toString() << std::endl;
-    // std::cout << right->getType() << std::endl;
-    // std::cout << std::endl;
     if (right->isPair()) {
         r = right->toVector();
-        // std::cout << "isPair()" << std::endl;
-        // std::cout << r.size() << std::endl;
-        // for (auto i: r) {
-        //     std::cout << i->toString() << std::endl;
-        // }
-        // std::cout << std::endl;
         for (auto i: r) {
             result.push_back(i);
         }
     } else if (right->getType() != "NilValue") {
-        // std::cout << "Not NilValue" << std::endl;
         result.push_back(right);
     }
     return result;
 }
 
-ValuePtr PairValue::getCar() {
+ValuePtr PairValue::getCar() const {
     return left;
 }
 
-ValuePtr PairValue::getCdr() {
+ValuePtr PairValue::getCdr() const {
     return right;
 }
 

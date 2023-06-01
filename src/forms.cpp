@@ -5,8 +5,10 @@
 
 #include <unordered_map>
 
-const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
-    {"define", defineForm}
+
+std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
+    {"define", defineForm},
+    {"quote", quoteForm}
 };
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
@@ -16,4 +18,8 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     } else {
         throw LispError("Malformed define.");
     }
+}
+
+ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    
 }
