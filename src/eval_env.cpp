@@ -29,19 +29,19 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             throw LispError("Variable " + *name + " not defined.");
         }
     } else if (expr->isPair()) {
-        if (auto name = expr->getCar()->asSymbol()) {
-            if (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end()) {
-                return SPECIAL_FORMS[*name](expr->getCdr()->toVector(), *this);
-            }
+        auto car = expr->getCar();
+        auto cdr = expr->getCdr();
+        auto name = car->asSymbol();
+        if ((name) and (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end())){
+            return SPECIAL_FORMS[*name](expr->getCdr()->toVector(), *this);
         } else {
-            ValuePtr proc = this->eval(expr->getCar());
-            std::vector<ValuePtr> args = evalList(expr->getCdr());
+            ValuePtr proc = this->eval(car);
+            std::vector<ValuePtr> args = evalList(cdr);
             return this->apply(proc, args);
         }
     } else {
         throw LispError("Unimplemented");
     }
-    return std::make_shared<NilValue>();    // make gcc happy
 }
 
 ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {

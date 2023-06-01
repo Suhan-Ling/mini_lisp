@@ -36,7 +36,16 @@ ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    return args[0];
+    int len = args.size();
+    if (len == 0) {
+        return std::make_shared<BooleanValue>(true);
+    }
+    for (auto i: args) {
+        if (env.eval(i)->toString() == "#f") {
+            return std::make_shared<BooleanValue>(false);
+        }
+    }
+    return env.eval(args[len - 1]);
 }
 
 ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
