@@ -48,7 +48,7 @@ ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
     if (typeid(*proc) == typeid(BuiltinProcValue)) {
         return proc->apply(args);
     } else {
-        throw LispError("Unimplemented");
+        throw LispError("Not a procedure " + proc->toString());
     }
 }
 

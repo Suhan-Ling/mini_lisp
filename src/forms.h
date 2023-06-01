@@ -12,5 +12,8 @@ extern  std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 
 SpecialFormType defineForm;
 SpecialFormType quoteForm;
+SpecialFormType ifForm;
+SpecialFormType andForm;
+SpecialFormType orForm;
 
 #endif
