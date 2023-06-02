@@ -14,19 +14,20 @@
 #define RJSJ_TEST_NO_EXIT
 
 struct TestCtx {
-    EvalEnv env {};
+    EnvPtr env = EvalEnv::createGlobal();
     std::string eval(std::string input) {
         auto tokens = Tokenizer::tokenize(input);
         Parser parser(std::move(tokens));
         auto value = parser.parse();
-        auto result = env.eval(std::move(value));
+        auto result = env->eval(std::move(value));
         return result->toString();
     }
 };
 
 int main() {
-    // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra);
-    EvalEnv env {};
+    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra);
+    EnvPtr env = EvalEnv::createGlobal();
+        std::cout << env << std::endl;
     while (true) {
         try {
             std::cout << ">>> " ;
@@ -38,8 +39,7 @@ int main() {
             auto tokens = Tokenizer::tokenize(line);
             Parser parser(std::move(tokens));               // TokenPtr 不支持复制
             auto value = parser.parse();
-            // std::cout << value->toString() << std::endl;
-            auto result = env.eval(std::move(value));  
+            auto result = env->eval(std::move(value));  
             std::cout << result->toString() << std::endl;    // 输出外部表示
         } catch (std::runtime_error& e) {
             std::cerr << "Error: " << e.what() << std::endl;

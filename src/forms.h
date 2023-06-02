@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
+using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EnvPtr);
 
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 

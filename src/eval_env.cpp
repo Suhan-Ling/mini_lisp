@@ -18,17 +18,17 @@ EvalEnv::EvalEnv() {
     }
 }
 
-EvalEnv::EvalEnv(EvalEnv& p) {
-    parent = std::make_shared<EvalEnv>(p);
+EvalEnv::EvalEnv(EnvPtr p) {
+    parent = std::move(p);
 }
 
-// static std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {
-//     return std::make_shared<EvalEnv>(EvalEnv());
-// }
+EnvPtr EvalEnv::createGlobal() {
+    return std::make_shared<EvalEnv>(EvalEnv());
+}
 
-// static std::shared_ptr<EvalEnv> EvalEnv::createGlobal(EvalEnv& p) {
-//     return std::make_shared<EvalEnv>(EvalEnv(p));
-// }
+EnvPtr EvalEnv::createGlobal(EnvPtr p) {
+    return std::make_shared<EvalEnv>(EvalEnv(p));
+}
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     if (expr->isSelfEvaluating()) {
@@ -36,7 +36,6 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
     } else if (expr->isNil()) {
         throw LispError("Evaluating nil is prohibited.");
     } else if (auto name = expr->asSymbol()) {
-        // if (auto value = symbolTable[*name]) {
         if (auto value = lookupBinding(*name)) {
             return value;
         } else {
@@ -48,7 +47,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         auto name = car->asSymbol();
         auto form = SPECIAL_FORMS.find(*name);
         if ((name) and (form != SPECIAL_FORMS.end())){
-            return (form->second)(cdr->toVector(), *this);
+            return (form->second)(cdr->toVector(), std::make_shared<EvalEnv>(*this));
         } else {
             ValuePtr proc = this->eval(car);
             std::vector<ValuePtr> args = evalList(cdr);

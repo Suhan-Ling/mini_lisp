@@ -18,9 +18,10 @@ const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
     {"lambda",  lambdaForm}
 };
 
-ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr defineForm(const std::vector<ValuePtr>& args, EnvPtr env) {
     if (auto name = args[0]->asSymbol()) {      // variable
-        env.defineBinding(*name, args[1]);
+        env->defineBinding(*name, args[1]);
+            std::cout << env->lookupBinding(*name)->toString() << std::endl;
         return std::make_shared<NilValue>();
     } else if (args[0]->isPair()) {             // lambda
         std::string lambdaName = args[0]->getCar()->toString();
@@ -30,42 +31,42 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         }
         std::vector<ValuePtr> body = args;
         body.erase(body.begin());
-        auto lambda = std::make_shared<LambdaValue>(params, body, env.shared_from_this());
-        env.defineBinding(lambdaName, lambda);
+        auto lambda = std::make_shared<LambdaValue>(params, body, env->shared_from_this());
+        env->defineBinding(lambdaName, lambda);
         return std::make_shared<NilValue>();
     } else {
         throw LispError("Malformed define form: " + args[0]->toString() + ".");
     }
 }
 
-ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr quoteForm(const std::vector<ValuePtr>& args, EnvPtr env) {
     return args[0];
 }
 
-ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (env.eval(args[0])->toString() == "#f") {
-        return env.eval(args[2]);
+ValuePtr ifForm(const std::vector<ValuePtr>& args, EnvPtr env) {
+    if (env->eval(args[0])->toString() == "#f") {
+        return env->eval(args[2]);
     } else {
-        return env.eval(args[1]);
+        return env->eval(args[1]);
     }
 }
 
-ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr andForm(const std::vector<ValuePtr>& args, EnvPtr env) {
     int len = args.size();
     if (len == 0) {
         return std::make_shared<BooleanValue>(true);
     }
     for (auto i: args) {
-        if (env.eval(i)->toString() == "#f") {
+        if (env->eval(i)->toString() == "#f") {
             return std::make_shared<BooleanValue>(false);
         }
     }
-    return env.eval(args[len - 1]);
+    return env->eval(args[len - 1]);
 }
 
-ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr orForm(const std::vector<ValuePtr>& args, EnvPtr env) {
     for (auto i: args) {
-        auto v = env.eval(i);
+        auto v = env->eval(i);
         if (v->toString() != "#f") {
             return v;
         }
@@ -73,12 +74,12 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return std::make_shared<BooleanValue>(false);
 }
 
-ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EnvPtr env) {
     std::vector<std::string> params;
     for (auto i: args[0]->toVector()) {
         params.push_back(i->toString());
     }
     std::vector<ValuePtr> body = args;
     body.erase(body.begin());
-    return std::make_shared<LambdaValue>(params, body, env.shared_from_this());
+    return std::make_shared<LambdaValue>(params, body, env->shared_from_this());
 }
