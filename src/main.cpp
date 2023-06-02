@@ -27,7 +27,6 @@ struct TestCtx {
 int main() {
     RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra);
     EnvPtr env = EvalEnv::createGlobal();
-        std::cout << env << std::endl;
     while (true) {
         try {
             std::cout << ">>> " ;

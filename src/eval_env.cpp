@@ -47,7 +47,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         auto name = car->asSymbol();
         auto form = SPECIAL_FORMS.find(*name);
         if ((name) and (form != SPECIAL_FORMS.end())){
-            return (form->second)(cdr->toVector(), std::make_shared<EvalEnv>(*this));
+            return (form->second)(cdr->toVector(), *this);
         } else {
             ValuePtr proc = this->eval(car);
             std::vector<ValuePtr> args = evalList(cdr);
