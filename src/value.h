@@ -1,29 +1,24 @@
 #ifndef VALUE_H
 #define VALUE_H
 
-
 #include <string>
 #include <memory>
 #include <typeinfo>
 #include <vector>
 #include <optional>
 
-
 class Value;
 using ValuePtr = std::shared_ptr<Value>;
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
-
 
 class Value {
 public:
     virtual ~Value() = default;
     virtual std::string toString() const = 0;
-
     bool isNil() const;
     bool isSelfEvaluating() const;
     bool isPair() const;
     bool isNumber() const;
-
     virtual std::vector<ValuePtr> toVector() const;
     virtual std::optional<std::string> asSymbol() const;
     virtual double asNumber() const;
@@ -36,10 +31,8 @@ public:
 
 class BooleanValue: public Value {
     bool value;
-
 public:
     BooleanValue(bool val): value{val} {}
-    ~BooleanValue() {}
     std::string toString() const override;
     std::string getType() const override;
 };
@@ -47,10 +40,8 @@ public:
 
 class NumericValue: public Value {
     double value;
-
 public:
     NumericValue(double val): value{val} {}
-    ~NumericValue() {}
     std::string toString() const override;
     std::string getType() const override;
     double asNumber() const;
@@ -62,7 +53,6 @@ class StringValue: public Value {
     
 public:
     StringValue(const std::string& val): value(val) {}
-    ~StringValue() {}
     std::string toString() const override;
     std::string getType() const override;
 };
@@ -71,7 +61,6 @@ public:
 class NilValue: public Value {
 public:
     NilValue() = default;
-    ~NilValue() {}
     std::string toString() const override;
     std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
@@ -79,10 +68,8 @@ public:
 
 class SymbolValue: public Value {
     std::string name;
-
 public:
     SymbolValue(const std::string& val): name(val) {}
-    ~SymbolValue() {}
     std::string toString() const override;
     std::string getType() const override;
     std::optional<std::string> asSymbol() const;
@@ -92,11 +79,9 @@ public:
 class PairValue: public Value {
     ValuePtr left;
     ValuePtr right;
-
 public:
     PairValue(ValuePtr l, ValuePtr r): 
         left(std::move(l)), right(std::move(r)) {}
-    ~PairValue() {}
     std::string toString() const override;
     std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
@@ -107,7 +92,6 @@ public:
 
 class BuiltinProcValue : public Value {
     BuiltinFuncType* func;
-
 public:
     BuiltinProcValue(BuiltinFuncType* f): func(f) {}
     std::string toString() const override;
@@ -115,5 +99,15 @@ public:
     ValuePtr apply(std::vector<ValuePtr> args);
 };
 
+class LambdaValue : public Value {
+    std::vector<std::string> params;
+    std::vector<ValuePtr> body;
+    // EvalEnv env;
+public:
+    LambdaValue(std::vector<std::string> p, 
+                std::vector<ValuePtr> b): params {p}, body{b} {}
+    std::string toString() const override;
+    std::string getType() const override;
+};
 
 #endif

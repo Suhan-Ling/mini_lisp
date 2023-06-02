@@ -12,7 +12,7 @@
 using namespace std::literals;
 
 EvalEnv::EvalEnv() {
-    for (auto i: BUILTIN_PROC) {
+    for (auto i: BUILTIN_PROCS) {
         symbolTable[i.first] = std::make_shared<BuiltinProcValue>(i.second);
     }
 }
@@ -33,7 +33,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         auto cdr = expr->getCdr();
         auto name = car->asSymbol();
         if ((name) and (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end())){
-            return SPECIAL_FORMS[*name](expr->getCdr()->toVector(), *this);
+            return SPECIAL_FORMS[*name](cdr->toVector(), *this);
         } else {
             ValuePtr proc = this->eval(car);
             std::vector<ValuePtr> args = evalList(cdr);

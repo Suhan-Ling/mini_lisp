@@ -5,21 +5,36 @@
 
 #include <unordered_map>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
-    {"define", defineForm},
-    {"quote", quoteForm},
-    {"if", ifForm},
-    {"and", andForm},
-    {"or", orForm},
+    {"define",  defineForm},
+    {"quote",   quoteForm},
+    {"if",      ifForm},
+    {"and",     andForm},
+    {"or",      orForm},
+    {"lambda",  lambdaForm}
 };
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (auto name = args[0]->asSymbol()) {
+    if (auto name = args[0]->asSymbol()) {      // variable
         env.addSymbol(*name, args[1]);
         return std::make_shared<NilValue>();
+    } else if (args[0]->isPair()) {             // lambda
+        std::string lambdaName = args[0]->getCar()->toString();
+        std::vector<std::string> params;
+        for (auto i: args[0]->getCdr()->toVector()) {
+            params.push_back(i->toString());
+        }
+        std::vector<ValuePtr> body = args;
+        body.erase(body.begin());
+        auto lambda = std::make_shared<LambdaValue>(params, body);
+        env.addSymbol(lambdaName, lambda);
+        return std::make_shared<NilValue>();
     } else {
-        throw LispError("Malformed define.");
+        throw LispError("Malformed define form: " + args[0]->toString() + ".");
     }
 }
 
@@ -49,5 +64,21 @@ ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    return args[0];
+    for (auto i: args) {
+        auto v = env.eval(i);
+        if (v->toString() != "#f") {
+            return v;
+        }
+    }
+    return std::make_shared<BooleanValue>(false);
+}
+
+ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    std::vector<std::string> params;
+    for (auto i: args[0]->toVector()) {
+        params.push_back(i->toString());
+    }
+    std::vector<ValuePtr> body = args;
+    body.erase(body.begin());
+    return std::make_shared<LambdaValue>(params, body);
 }

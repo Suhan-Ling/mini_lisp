@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROC = {
+const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"print",       &print},
     {"atom?",       &atom_},
     {"boolean?",    &boolean_},
@@ -21,7 +21,12 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROC = {
     {"+",           &add},
     {"-",           &substract},
     {"*",           &multiply}, 
-    {"/",           &divide}
+    {"/",           &divide},
+    {"=",           &_equal},
+    {">",           &_more},
+    {"<",           &_less},
+    {">=",          &_moreOrEqual},
+    {"<=",          &_lessOrEqual}
 };
 
 ValuePtr print(const std::vector<ValuePtr>& params) {
@@ -76,70 +81,94 @@ ValuePtr symbol_(const std::vector<ValuePtr>& params) {
     return std::make_shared<BooleanValue>(params[0]->getType() == "SymbolValue");
 }
 
-ValuePtr add(const std::vector<ValuePtr>& params) {
-    int result = 0;
+ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, int result, 
+                        binaryOperatorFuncType func) {
     for (const auto& i : params) {
         if (!i->isNumber()) {
             throw LispError(i->toString() + " is nut number.");
         }
-        result += i->asNumber();
+        result = func(result, i->asNumber());
     }
     return std::make_shared<NumericValue>(result);
 }
 
-ValuePtr substract(const std::vector<ValuePtr>& params) {
-    int len = params.size();
-    if (len == 2) {
-        if (!params[0]->isNumber()) {
-            throw LispError(params[0]->toString() + " is nut number.");
-        } else if (!params[1]->isNumber()) {
-            throw LispError(params[1]->toString() + " is nut number.");
-        }
-        return std::make_shared<NumericValue>(params[0]->asNumber() - params[1]->asNumber());
-    } else if (len == 1) {
-        if (!params[0]->isNumber()) {
-            throw LispError(params[0]->toString() + " is nut number.");
-        }
-        return std::make_shared<NumericValue>(0 - params[0]->asNumber());
-    } else if (len > 2) {
-        throw LispError("Too many arguments: " + std::to_string(len) + " > 2.");
-    } else {    // len == 0
-        throw LispError("Too few arguments: 0 < 1.");
-    }
+ValuePtr add(const std::vector<ValuePtr>& params) {
+    return addAndMultiply(params, 0, 
+                            [](double x, double y) -> double {return x + y;});
 }
 
 ValuePtr multiply(const std::vector<ValuePtr>& params) {
-    int result = 1;
-    for (const auto& i : params) {
-        if (!i->isNumber()) {
-            throw LispError(i->toString() + " is nut number.");
-        }
-        result *= i->asNumber();
-    }
-    return std::make_shared<NumericValue>(result);
+    return addAndMultiply(params, 1, 
+                            [](double x, double y) -> double {return x * y;});
 }
 
-ValuePtr divide(const std::vector<ValuePtr>& params) {
+ValuePtr substractAndDivide(const std::vector<ValuePtr>& params, 
+                            double defaultValue, binaryOperatorFuncType func) {
     int len = params.size();
     if (len == 2) {
         if (!params[0]->isNumber()) {
             throw LispError(params[0]->toString() + " is nut number.");
         } else if (!params[1]->isNumber()) {
             throw LispError(params[1]->toString() + " is nut number.");
-        } else if (params[1]->asNumber() == 0) {
-            throw LispError("Cannot divide 0.");
         }
-        return std::make_shared<NumericValue>(params[0]->asNumber() / params[1]->asNumber());
+        return std::make_shared<NumericValue>(func(params[0]->asNumber(), params[1]->asNumber()));
     } else if (len == 1) {
         if (!params[0]->isNumber()) {
             throw LispError(params[0]->toString() + " is nut number.");
-        } else if (params[0]->asNumber() == 0) {
-            throw LispError("Cannot divide 0.");
         }
-        return std::make_shared<NumericValue>(1 / params[0]->asNumber());
+        return std::make_shared<NumericValue>(func(defaultValue, params[0]->asNumber()));
     } else if (len > 2) {
         throw LispError("Too many arguments: " + std::to_string(len) + " > 2.");
     } else {    // len == 0
         throw LispError("Too few arguments: 0 < 1.");
     }
+}
+
+ValuePtr substract(const std::vector<ValuePtr>& params) {
+    return substractAndDivide(params, 0, 
+                            [](double x, double y) -> double {return x - y;});
+}
+
+ValuePtr divide(const std::vector<ValuePtr>& params) {
+    if ((params.size() == 2) and (params[1]->asNumber() == 0)) {
+        throw LispError("Cannot divide 0.");
+    }
+    return substractAndDivide(params, 1, 
+                            [](double x, double y) -> double {return x / y;});
+}
+
+ValuePtr compare(const std::vector<ValuePtr>& params, compareFuncType* comp) {
+    int len = params.size();
+    if (len < 2) {
+        throw LispError("Too few arguments: " + std::to_string(len) + " < 2.");
+    }
+    auto x = params[0];
+    auto y = params[1];
+    if (!x->isNumber()) {
+        throw LispError(x->toString() + "is not number.");
+    }
+    if (!y->isNumber()) {
+        throw LispError(y->toString() + "is not number.");
+    }
+    return std::make_shared<BooleanValue>(comp(x->asNumber(), y->asNumber()));
+}
+
+ValuePtr _equal(const std::vector<ValuePtr>& params) {
+    return compare(params, [](double x, double y) -> bool {return x == y;});
+}
+
+ValuePtr _more(const std::vector<ValuePtr>& params) {
+    return compare(params, [](double x, double y) -> bool {return x > y;});
+}
+
+ValuePtr _less(const std::vector<ValuePtr>& params) {
+    return compare(params, [](double x, double y) -> bool {return x < y;});
+}
+
+ValuePtr _moreOrEqual(const std::vector<ValuePtr>& params) {
+    return compare(params, [](double x, double y) -> bool {return x >= y;});
+}
+
+ValuePtr _lessOrEqual(const std::vector<ValuePtr>& params) {
+    return compare(params, [](double x, double y) -> bool {return x <= y;});
 }

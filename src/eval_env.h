@@ -2,6 +2,7 @@
 #define EVAL_ENV_H
 
 #include <unordered_map>
+#include <vector>
 
 #include "./value.h"
 #include "./builtins.h"

@@ -16,7 +16,8 @@ bool Value::isSelfEvaluating() const {
     return (typeid(*this) == typeid(BooleanValue)) or
            (typeid(*this) == typeid(NumericValue)) or
            (typeid(*this) == typeid(StringValue)) or
-           (typeid(*this) == typeid(BuiltinProcValue));
+           (typeid(*this) == typeid(BuiltinProcValue)) or
+           (typeid(*this) == typeid(LambdaValue));
 }
 
 bool Value::isPair() const {
@@ -174,4 +175,12 @@ std::string BuiltinProcValue::getType() const {
 
 ValuePtr BuiltinProcValue::apply(std::vector<ValuePtr> args) {
     return func(args);
+}
+
+std::string LambdaValue::toString() const{
+    return "#<procedure>";
+}
+
+std::string LambdaValue::getType() const {
+    return "LambdaValue";
 }
