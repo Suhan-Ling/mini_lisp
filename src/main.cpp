@@ -14,7 +14,7 @@
 #define RJSJ_TEST_NO_EXIT
 
 struct TestCtx {
-    EvalEnv env;
+    EvalEnv env {};
     std::string eval(std::string input) {
         auto tokens = Tokenizer::tokenize(input);
         Parser parser(std::move(tokens));
@@ -26,7 +26,7 @@ struct TestCtx {
 
 int main() {
     // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra);
-    EvalEnv env;
+    EvalEnv env {};
     while (true) {
         try {
             std::cout << ">>> " ;

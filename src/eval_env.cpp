@@ -12,10 +12,23 @@
 using namespace std::literals;
 
 EvalEnv::EvalEnv() {
+    parent = nullptr;
     for (auto i: BUILTIN_PROCS) {
         symbolTable[i.first] = std::make_shared<BuiltinProcValue>(i.second);
     }
 }
+
+EvalEnv::EvalEnv(EvalEnv& p) {
+    parent = std::make_shared<EvalEnv>(p);
+}
+
+// static std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {
+//     return std::make_shared<EvalEnv>(EvalEnv());
+// }
+
+// static std::shared_ptr<EvalEnv> EvalEnv::createGlobal(EvalEnv& p) {
+//     return std::make_shared<EvalEnv>(EvalEnv(p));
+// }
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     if (expr->isSelfEvaluating()) {
@@ -23,7 +36,8 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
     } else if (expr->isNil()) {
         throw LispError("Evaluating nil is prohibited.");
     } else if (auto name = expr->asSymbol()) {
-        if (auto value = symbolTable[*name]) {
+        // if (auto value = symbolTable[*name]) {
+        if (auto value = lookupBinding(*name)) {
             return value;
         } else {
             throw LispError("Variable " + *name + " not defined.");
@@ -32,8 +46,9 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         auto car = expr->getCar();
         auto cdr = expr->getCdr();
         auto name = car->asSymbol();
-        if ((name) and (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end())){
-            return SPECIAL_FORMS[*name](cdr->toVector(), *this);
+        auto form = SPECIAL_FORMS.find(*name);
+        if ((name) and (form != SPECIAL_FORMS.end())){
+            return (form->second)(cdr->toVector(), *this);
         } else {
             ValuePtr proc = this->eval(car);
             std::vector<ValuePtr> args = evalList(cdr);
@@ -60,6 +75,17 @@ std::vector<ValuePtr> EvalEnv::evalList(ValuePtr expr) {
     return result;
 }
 
-void EvalEnv::addSymbol(std::string name, ValuePtr v) {
+void EvalEnv::defineBinding(std::string name, ValuePtr v) {
     symbolTable[name] = eval(v);
+}
+
+ValuePtr EvalEnv::lookupBinding(std::string name) {
+    if (auto value = this->symbolTable[name]) {
+        return value;
+    }
+    if (this->parent) {
+        return this->parent->lookupBinding(name);
+    } else {
+        return nullptr;
+    }
 }

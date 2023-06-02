@@ -9,7 +9,7 @@
 #include <vector>
 #include <algorithm>
 
-std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
+const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
     {"define",  defineForm},
     {"quote",   quoteForm},
     {"if",      ifForm},
@@ -20,7 +20,7 @@ std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (auto name = args[0]->asSymbol()) {      // variable
-        env.addSymbol(*name, args[1]);
+        env.defineBinding(*name, args[1]);
         return std::make_shared<NilValue>();
     } else if (args[0]->isPair()) {             // lambda
         std::string lambdaName = args[0]->getCar()->toString();
@@ -30,8 +30,8 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         }
         std::vector<ValuePtr> body = args;
         body.erase(body.begin());
-        auto lambda = std::make_shared<LambdaValue>(params, body);
-        env.addSymbol(lambdaName, lambda);
+        auto lambda = std::make_shared<LambdaValue>(params, body, env.shared_from_this());
+        env.defineBinding(lambdaName, lambda);
         return std::make_shared<NilValue>();
     } else {
         throw LispError("Malformed define form: " + args[0]->toString() + ".");
@@ -80,5 +80,5 @@ ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     }
     std::vector<ValuePtr> body = args;
     body.erase(body.begin());
-    return std::make_shared<LambdaValue>(params, body);
+    return std::make_shared<LambdaValue>(params, body, env.shared_from_this());
 }

@@ -8,6 +8,7 @@
 #include <optional>
 
 class Value;
+class EvalEnv;
 using ValuePtr = std::shared_ptr<Value>;
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
 
@@ -102,10 +103,12 @@ public:
 class LambdaValue : public Value {
     std::vector<std::string> params;
     std::vector<ValuePtr> body;
-    // EvalEnv env;
+    std::shared_ptr<EvalEnv> env;
 public:
     LambdaValue(std::vector<std::string> p, 
-                std::vector<ValuePtr> b): params {p}, body{b} {}
+                std::vector<ValuePtr> b,
+                std::shared_ptr<EvalEnv> e): 
+                params {p}, body{b}, env {std::move(e)} {}
     std::string toString() const override;
     std::string getType() const override;
 };

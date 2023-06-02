@@ -8,7 +8,7 @@
 
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 
-extern std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
+extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 
 SpecialFormType defineForm;
 SpecialFormType quoteForm;
