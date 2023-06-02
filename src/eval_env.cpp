@@ -26,7 +26,7 @@ EnvPtr EvalEnv::createGlobal() {
     return std::make_shared<EvalEnv>(EvalEnv());
 }
 
-EnvPtr EvalEnv::createGlobal(EnvPtr p) {
+EnvPtr EvalEnv::createChild(EnvPtr p) {
     return std::make_shared<EvalEnv>(EvalEnv(p));
 }
 
@@ -60,6 +60,8 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
 
 ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
     if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        return proc->apply(args);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
         return proc->apply(args);
     } else {
         throw LispError("Not a procedure " + proc->toString());

@@ -81,7 +81,7 @@ ValuePtr symbol_(const std::vector<ValuePtr>& params) {
     return std::make_shared<BooleanValue>(params[0]->getType() == "SymbolValue");
 }
 
-ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, int result, 
+ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, double result, 
                         binaryOperatorFuncType func) {
     for (const auto& i : params) {
         if (!i->isNumber()) {

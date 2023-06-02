@@ -28,7 +28,7 @@ public:
     virtual double asNumber() const;
     virtual ValuePtr getCar() const;
     virtual ValuePtr getCdr() const;
-    virtual ValuePtr apply(std::vector<ValuePtr> args);
+    virtual ValuePtr apply(const std::vector<ValuePtr>& args);
     virtual std::string getType() const = 0;
 };
 
@@ -100,7 +100,7 @@ public:
     BuiltinProcValue(BuiltinFuncType* f): func(f) {}
     std::string toString() const override;
     std::string getType() const override;
-    ValuePtr apply(std::vector<ValuePtr> args);
+    ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 
 class LambdaValue : public Value {
@@ -114,6 +114,7 @@ public:
                 params {p}, body{b}, env {std::move(e)} {}
     std::string toString() const override;
     std::string getType() const override;
+    ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 
 #endif

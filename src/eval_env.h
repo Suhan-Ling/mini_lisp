@@ -15,7 +15,7 @@ public:
     EvalEnv(EnvPtr p);
 public:
     static EnvPtr createGlobal();
-    static EnvPtr createGlobal(EnvPtr p);
+    static EnvPtr createChild(EnvPtr p);
     ValuePtr eval(ValuePtr expr);
     ValuePtr apply(ValuePtr proc, std::vector<ValuePtr> args);
     std::vector<ValuePtr> evalList(ValuePtr expr);

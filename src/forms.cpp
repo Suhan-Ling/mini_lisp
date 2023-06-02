@@ -21,7 +21,6 @@ const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (auto name = args[0]->asSymbol()) {      // variable
         env.defineBinding(*name, args[1]);
-            std::cout << env.lookupBinding(*name)->toString() << std::endl;
         return std::make_shared<NilValue>();
     } else if (args[0]->isPair()) {             // lambda
         std::string lambdaName = args[0]->getCar()->toString();
