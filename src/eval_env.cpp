@@ -60,9 +60,9 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
 
 ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
     if (typeid(*proc) == typeid(BuiltinProcValue)) {
-        return proc->apply(args);
+        return proc->apply(args, *this);
     } else if (typeid(*proc) == typeid(LambdaValue)) {
-        return proc->apply(args);
+        return proc->apply(args, *this);
     } else {
         throw LispError("Not a procedure " + proc->toString());
     }

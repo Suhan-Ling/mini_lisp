@@ -49,7 +49,7 @@ ValuePtr Value::getCdr() const {
     throw LispError("Not a pair value.");
 }
 
-ValuePtr Value::apply(const std::vector<ValuePtr>& args) {
+ValuePtr Value::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
     throw LispError("Not a procedure.");
 }
 
@@ -174,8 +174,8 @@ std::string BuiltinProcValue::getType() const {
     return "BuiltinProcValue";
 }
 
-ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args) {
-    return func(args);
+ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    return func(args, env);
 }
 
 std::string LambdaValue::toString() const{
@@ -186,8 +186,8 @@ std::string LambdaValue::getType() const {
     return "LambdaValue";
 }
 
-ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args) {
-    EnvPtr envChild = EvalEnv::createChild(env);
+ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    EnvPtr envChild = EvalEnv::createChild(this->env);
     int paramsLen = params.size();
     int argsLen = args.size();
     if (paramsLen != argsLen) {
