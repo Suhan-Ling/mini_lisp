@@ -16,14 +16,21 @@ using EnvPtr = std::shared_ptr<EvalEnv>;
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 
+bool isInt(double value);
+
 class Value {
 public:
     virtual ~Value() = default;
     virtual std::string toString() const = 0;
-    bool isNil() const;
-    bool isSelfEvaluating() const;
-    bool isPair() const;
+    bool isBool() const;
     bool isNumber() const;
+    bool isString() const;
+    bool isNil() const;
+    bool isSymbol() const;
+    bool isPair() const;
+    bool isProc() const;
+    bool isLambda() const;
+    bool isSelfEvaluating() const;
     virtual std::vector<ValuePtr> toVector() const;
     virtual std::optional<std::string> asSymbol() const;
     virtual double asNumber() const;

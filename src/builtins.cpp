@@ -48,17 +48,17 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     // {"modulo",      &__modulo},
     // {"remainder",   &__remainder},
 
-    // {"eq?",         &__eq_},
-    // {"equal?",      &__equal_},
-    // {"not",         &__not},
+    {"eq?",         &__eq_},
+    {"equal?",      &__equal_},
+    {"not",         &__not},
     {"=",           &__equal},
     {">",           &__more},
     {"<",           &__less},
     {">=",          &__moreOrEqual},
-    {"<=",          &__lessOrEqual}
-    // {"even?",       &__even_},
-    // {"odd?",        &__odd_},
-    // {"zero?",       &__zero_}
+    {"<=",          &__lessOrEqual},
+    {"even?",       &__even_},
+    {"odd?",        &__odd_},
+    {"zero?",       &__zero_}
 };
 
 // ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
@@ -98,21 +98,21 @@ ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 ValuePtr __atom_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     bool b;
-    b = (params[0]->getType() == "BooleanValue") or
-        (params[0]->getType() == "NumericValue") or
-        (params[0]->getType() == "StringValue") or
-        (params[0]->getType() == "SymbolValue") or
-        (params[0]->getType() == "NilValue");
+    b = params[0]->isBool() or
+        params[0]->isNumber() or
+        params[0]->isString() or
+        params[0]->isSymbol() or
+        params[0]->isNil();
     return std::make_shared<BooleanValue>(b);
 }
 
 ValuePtr __boolean_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "BooleanValue");
+    return std::make_shared<BooleanValue>(params[0]->isBool());
 }
 
 ValuePtr __integer_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     bool b;
-    b = (params[0]->getType() == "NumericValue") and 
+    b = (params[0]->isNumber()) and 
         (params[0]->asNumber() == std::floor(params[0]->asNumber()));
     return std::make_shared<BooleanValue>(b);
 }
@@ -122,27 +122,27 @@ ValuePtr __integer_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 // }
 
 ValuePtr __number_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "NumericValue");
+    return std::make_shared<BooleanValue>(params[0]->isNumber());
 }
 
 ValuePtr __null_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "NilValue");
+    return std::make_shared<BooleanValue>(params[0]->isNil());
 }
 
 ValuePtr __pair_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "PairValue");
+    return std::make_shared<BooleanValue>(params[0]->isPair());
 }
 
 ValuePtr __procedure_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "BuiltinProcValue");
+    return std::make_shared<BooleanValue>(params[0]->isProc());
 }
 
 ValuePtr __string_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "StringValue");
+    return std::make_shared<BooleanValue>(params[0]->isString());
 }
 
 ValuePtr __symbol_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<BooleanValue>(params[0]->getType() == "SymbolValue");
+    return std::make_shared<BooleanValue>(params[0]->isSymbol());
 }
 
 // ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
@@ -257,17 +257,27 @@ ValuePtr __divide(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 // }
 
-// ValuePtr __eq_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __eq_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    if (params[0]->isBool()     or  params[1]->isBool()     or
+        params[0]->isNumber()   or  params[1]->isNumber()   or
+        params[0]->isSymbol()   or  params[1]->isSymbol()   or
+        params[0]->isNil()      or  params[1]->isNil()      ) {
+        return __equal_(params, env);
+    } else {
+        bool b = params[0] == params[1];
+        return std::make_shared<BooleanValue>(b);
+    }
+}
 
-// }
+ValuePtr __equal_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    bool b = (params[0]->toString().compare(params[1]->toString()));
+    return std::make_shared<BooleanValue>(!b);
+}
 
-// ValuePtr __equal_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __not(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
+ValuePtr __not(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    bool b = (params[0]->toString() == "#f");
+    return std::make_shared<BooleanValue>(b);
+}
 
 ValuePtr compare(const std::vector<ValuePtr>& params, compareFuncType* comp) {
     int len = params.size();
@@ -305,14 +315,17 @@ ValuePtr __lessOrEqual(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return compare(params, [](double x, double y) -> bool {return x <= y;});
 }
 
-// ValuePtr __even_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __even_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    double v = params[0]->asNumber();
+    return std::make_shared<BooleanValue>(isInt(v) && (int(v) % 2 == 0));
+}
 
-// }
+ValuePtr __odd_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    double v = params[0]->asNumber();
+    return std::make_shared<BooleanValue>(isInt(v) && !(int(v) % 2 == 0));
+}
 
-// ValuePtr __odd_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __zero_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
+ValuePtr __zero_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    double v = params[0]->asNumber();
+    return std::make_shared<BooleanValue>(v == 0);
+}

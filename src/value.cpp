@@ -9,8 +9,40 @@
 #include <typeinfo>
 #include <functional>
 
+bool isInt(double value) {
+    return std::floor(value) == value;
+}
+
+bool Value::isBool() const {
+    return (typeid(*this) == typeid(BooleanValue));
+}
+
+bool Value::isNumber() const {
+    return (typeid(*this) == typeid(NumericValue));
+}
+
+bool Value::isString() const {
+    return (typeid(*this) == typeid(StringValue));
+}
+
 bool Value::isNil() const {
     return (typeid(*this) == typeid(NilValue));
+}
+
+bool Value::isSymbol() const {
+    return (typeid(*this) == typeid(SymbolValue));
+}
+
+bool Value::isPair() const {
+    return (typeid(*this) == typeid(PairValue));
+}
+
+bool Value::isProc() const {
+    return (typeid(*this) == typeid(BuiltinProcValue));
+}
+
+bool Value::isLambda() const {
+    return (typeid(*this) == typeid(LambdaValue));
 }
 
 bool Value::isSelfEvaluating() const {
@@ -19,14 +51,6 @@ bool Value::isSelfEvaluating() const {
            (typeid(*this) == typeid(StringValue)) or
            (typeid(*this) == typeid(BuiltinProcValue)) or
            (typeid(*this) == typeid(LambdaValue));
-}
-
-bool Value::isPair() const {
-    return (typeid(*this) == typeid(PairValue));
-}
-
-bool Value::isNumber() const {
-    return (typeid(*this) == typeid(NumericValue));
 }
 
 std::vector<ValuePtr> Value::toVector() const {
@@ -38,7 +62,7 @@ std::optional<std::string> Value::asSymbol() const {
 }
 
 double Value::asNumber() const {
-    throw LispError("Not a number.");
+    throw LispError(this->toString() + " is not number.");
 }
 
 ValuePtr Value::getCar() const {
@@ -66,7 +90,7 @@ std::string BooleanValue::getType() const {
 }
 
 std::string NumericValue::toString() const {
-    if (std::floor(value) == value) {
+    if (isInt(value)) {
         return std::to_string(static_cast<int>(value));
     } else {
         return std::to_string(value);
@@ -151,7 +175,7 @@ std::vector<ValuePtr> PairValue::toVector() const {
         for (auto i: r) {
             result.push_back(i);
         }
-    } else if (right->getType() != "NilValue") {
+    } else if (!right->isNil()) {
         result.push_back(right);
     }
     return result;
@@ -167,7 +191,7 @@ ValuePtr PairValue::getCdr() const {
 
 
 std::string BuiltinProcValue::toString() const {
-    return "#<procedure>"; 
+    return "#<procedure: builtin>"; 
 }
 
 std::string BuiltinProcValue::getType() const {
@@ -179,7 +203,7 @@ ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env
 }
 
 std::string LambdaValue::toString() const{
-    return "#<procedure>";
+    return "#<procedure: lambda>";
 }
 
 std::string LambdaValue::getType() const {

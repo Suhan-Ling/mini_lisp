@@ -51,16 +51,16 @@ BuiltinFuncType __divide;
 // BuiltinFuncType __modulo;
 // BuiltinFuncType __remainder;
 
-// BuiltinFuncType __eq_;
-// BuiltinFuncType __equal_;
-// BuiltinFuncType __not;
+BuiltinFuncType __eq_;
+BuiltinFuncType __equal_;
+BuiltinFuncType __not;
 BuiltinFuncType __equal;
 BuiltinFuncType __more;
 BuiltinFuncType __less;
 BuiltinFuncType __moreOrEqual;
 BuiltinFuncType __lessOrEqual;
-// BuiltinFuncType __even_;
-// BuiltinFuncType __odd_;
-// BuiltinFuncType __zero_;
+BuiltinFuncType __even_;
+BuiltinFuncType __odd_;
+BuiltinFuncType __zero_;
 
 #endif
