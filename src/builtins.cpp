@@ -61,6 +61,34 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     // {"zero?",       &__zero_}
 };
 
+// ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __displayln(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __error(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __eval(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __exit(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __newline(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
 ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
     for (const auto& i: params) {
         std::cout << i->toString() << std::endl;
@@ -89,6 +117,10 @@ ValuePtr __integer_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return std::make_shared<BooleanValue>(b);
 }
 
+// ValuePtr __list_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
 ValuePtr __number_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return std::make_shared<BooleanValue>(params[0]->getType() == "NumericValue");
 }
@@ -112,6 +144,42 @@ ValuePtr __string_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 ValuePtr __symbol_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return std::make_shared<BooleanValue>(params[0]->getType() == "SymbolValue");
 }
+
+// ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __car(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __cdr(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __cons(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __length(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __list(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __filter(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __reduce(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
 
 ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, double result, 
                         binaryOperatorFuncType func) {
@@ -169,6 +237,38 @@ ValuePtr __divide(const std::vector<ValuePtr>& params, EvalEnv& env) {
                             [](double x, double y) -> double {return x / y;});
 }
 
+// ValuePtr __abs(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __expt(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __quotient(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __modulo(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __remainder(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __eq_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __equal_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __not(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
 ValuePtr compare(const std::vector<ValuePtr>& params, compareFuncType* comp) {
     int len = params.size();
     if (len < 2) {
@@ -204,3 +304,15 @@ ValuePtr __moreOrEqual(const std::vector<ValuePtr>& params, EvalEnv& env) {
 ValuePtr __lessOrEqual(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return compare(params, [](double x, double y) -> bool {return x <= y;});
 }
+
+// ValuePtr __even_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __odd_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
+
+// ValuePtr __zero_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+
+// }
