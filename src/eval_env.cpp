@@ -64,7 +64,7 @@ ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
     } else if (typeid(*proc) == typeid(LambdaValue)) {
         return proc->apply(args, *this);
     } else {
-        throw LispError("Not a procedure " + proc->toString());
+        throw LispError("Not a procedure " + proc->toString() + ".");
     }
 }
 

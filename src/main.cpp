@@ -9,9 +9,9 @@
 #include "./eval_env.h"
 #include "./builtins.h"
 #include "./forms.h"
-#include "rjsj_test.hpp"
 
 #define RJSJ_TEST_NO_EXIT
+#include "rjsj_test.hpp"
 
 struct TestCtx {
     EnvPtr env = EvalEnv::createGlobal();
@@ -37,10 +37,10 @@ int main() {
                 std::exit(0);
             }
             auto tokens = Tokenizer::tokenize(line);
-            Parser parser(std::move(tokens));               // TokenPtr 不支持复制
+            Parser parser(std::move(tokens));
             auto value = parser.parse();
             auto result = env->eval(std::move(value));  
-            std::cout << result->toString() << std::endl;    // 输出外部表示
+            std::cout << result->toString() << std::endl;
         } catch (std::runtime_error& e) {
             if (typeid(e) == (typeid(SyntaxError))) {
                 std::cerr << "SyntaxError: " << e.what() << std::endl;

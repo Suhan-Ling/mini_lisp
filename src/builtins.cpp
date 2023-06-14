@@ -8,19 +8,19 @@
 #include <unordered_map>
 
 const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
-    // {"apply",       &__apply},	
-    // {"display",     &__display},	
-    // {"displayln",   &__displayln},	
-    // {"error",       &__error},	
-    // {"eval",        &__eval},	
-    // {"exit",        &__exit},	
-    // {"newline",     &__newline},	
+    {"apply",       &__apply},	
+    {"display",     &__display},	
+    {"displayln",   &__displayln},	
+    {"error",       &__error},	
+    {"eval",        &__eval},	
+    {"exit",        &__exit},	
+    {"newline",     &__newline},	
     {"print",       &__print},
 
     {"atom?",       &__atom_},
     {"boolean?",    &__boolean_},
     {"integer?",    &__integer_},
-    // {"list?",       &__list_},
+    {"list?",       &__list_},
     {"number?",     &__number_},
     {"null?",       &__null_},
     {"pair?",       &__pair_},
@@ -28,15 +28,15 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"string?",     &__string_},
     {"symbol?",     &__symbol_},
 
-    // {"append",      &__append},
-    // {"car",         &__car},
-    // {"cdr",         &__cdr},
-    // {"cons",        &__cons},
-    // {"length",      &__length},
-    // {"list",        &__list},
-    // {"map",         &__map},
-    // {"filter",      &__filter},
-    // {"reduce",      &__reduce},
+    {"append",      &__append},
+    {"car",         &__car},
+    {"cdr",         &__cdr},
+    {"cons",        &__cons},
+    {"length",      &__length},
+    {"list",        &__list},
+    {"map",         &__map},
+    {"filter",      &__filter},
+    {"reduce",      &__reduce},
 
     {"+",           &__add},
     {"-",           &__substract},
@@ -78,33 +78,33 @@ void lenCheck(int len, int min, int max) {
     }
 }
 
-// ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// }
+ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __displayln(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// }
+ValuePtr __error(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// ValuePtr __displayln(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __eval(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// }
+ValuePtr __exit(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// ValuePtr __error(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __eval(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __exit(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __newline(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
+ValuePtr __newline(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
 ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
     for (const auto& i: params) {
@@ -137,10 +137,21 @@ ValuePtr __integer_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return std::make_shared<BooleanValue>(b);
 }
 
-// ValuePtr __list_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    // lenCheck(params.size(), 1, -1);
-
-// }
+ValuePtr __list_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    lenCheck(params.size(), 1, -1);
+    ValuePtr car;
+    ValuePtr cdr = params[0];
+    while (1) {
+        if (cdr->isNil()) {
+            return std::make_shared<BooleanValue>(true);
+        }
+        if (!cdr->isPair()) {
+            return std::make_shared<BooleanValue>(false);
+        }
+        car = cdr->getCar();
+        cdr = cdr->getCdr();
+    }
+}
 
 ValuePtr __number_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     lenCheck(params.size(), 1, -1);
@@ -173,41 +184,83 @@ ValuePtr __symbol_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     return std::make_shared<BooleanValue>(params[0]->isSymbol());
 }
 
-// ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// }
+ValuePtr __car(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    lenCheck(params.size(), 1, -1);
+    return params[0]->getCar();
+}
 
-// ValuePtr __car(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __cdr(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    lenCheck(params.size(), 1, -1);
+    return params[0]->getCdr();
+}
 
-// }
+ValuePtr __cons(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    lenCheck(params.size(), 2, -1);
+    return std::make_shared<PairValue>(params[0], params[1]);
+}
 
-// ValuePtr __cdr(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __length(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    lenCheck(params.size(), 1, -1);
+    int cnt = 0;
+    ValuePtr car;
+    ValuePtr cdr = params[0];
+    while (1) {
+        if (cdr->isNil()) {
+            break;
+        }
+        if (!cdr->isPair()) {
+            throw LispError("Malformed list: expected pair or nil, got " +
+                            cdr->toString());
+        }
+        cnt++;
+        car = cdr->getCar();
+        cdr = cdr->getCdr();
+    }
+    return std::make_shared<NumericValue>(cnt);
+}
 
-// }
+ValuePtr myLength(ValuePtr c) {
+    int cnt = 0;
+    ValuePtr car;
+    ValuePtr cdr = c;
+    while (1) {
+        if (cdr->isNil()) {
+            break;
+        }
+        if (!cdr->isPair()) {
+            throw LispError("Malformed list: expected pair or nil, got " +
+                            cdr->toString());
+        }
+        cnt++;
+        car = cdr->getCar();
+        cdr = cdr->getCdr();
+    }
+    return std::make_shared<NumericValue>(cnt);
+}
 
-// ValuePtr __cons(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __list(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    ValuePtr cdr = std::make_shared<NilValue>();
+    for (int i = params.size() - 1; i >= 0; i--) {
+        cdr = std::make_shared<PairValue>(params[i], cdr);
+    }
+    return cdr;
+}
 
-// }
+ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// ValuePtr __length(const std::vector<ValuePtr>& params, EvalEnv& env) {
+ValuePtr __filter(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
-// }
-
-// ValuePtr __list(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __filter(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
-
-// ValuePtr __reduce(const std::vector<ValuePtr>& params, EvalEnv& env) {
-
-// }
+ValuePtr __reduce(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return std::make_shared<NilValue>();                                            // noooooo
+}
 
 ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, double result, 
                         binaryOperatorFuncType func) {

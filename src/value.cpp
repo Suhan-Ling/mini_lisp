@@ -140,27 +140,19 @@ std::string SymbolValue::getType() const {
     return "SymbolValue";
 }
 
-static int PairValue_toString_layer = 0;
-
 std::string PairValue::toString() const {
-    PairValue_toString_layer++;
-
-    std::string result = "";
-    if (right->toString() == "()") {
-        result += left->toString();
-    } else if (auto rightPair = dynamic_cast<PairValue*>(right.get())) {
-        result += left->toString() + " " + rightPair->toString();
+    std::string left = car->toString();
+    std::string right;
+    if (cdr->isNil()) {
+        right = "";
+    } else if (cdr->isPair()) {
+        right = cdr->toString();
+        right.replace(0, 1, " ");
+        right.pop_back();
     } else {
-        result += left->toString() + " . " + right->toString();
+        right = " . " + cdr->toString();
     }
-    
-    PairValue_toString_layer--;
-    if (PairValue_toString_layer) {
-        return result;
-    } else {
-        // printf("111\n");
-        return "(" + result + ")";
-    }
+    return "(" + left + right + ")";
 }
 
 std::string PairValue::getType() const {
@@ -169,24 +161,24 @@ std::string PairValue::getType() const {
 
 std::vector<ValuePtr> PairValue::toVector() const {
     std::vector<ValuePtr> result, r;
-    result.push_back(left);
-    if (right->isPair()) {
-        r = right->toVector();
+    result.push_back(car);
+    if (cdr->isPair()) {
+        r = cdr->toVector();
         for (auto i: r) {
             result.push_back(i);
         }
-    } else if (!right->isNil()) {
-        result.push_back(right);
+    } else if (!cdr->isNil()) {
+        result.push_back(cdr);
     }
     return result;
 }
 
 ValuePtr PairValue::getCar() const {
-    return left;
+    return car;
 }
 
 ValuePtr PairValue::getCdr() const {
-    return right;
+    return cdr;
 }
 
 

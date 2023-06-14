@@ -89,11 +89,11 @@ public:
 
 
 class PairValue: public Value {
-    ValuePtr left;
-    ValuePtr right;
+    ValuePtr car;
+    ValuePtr cdr;
 public:
     PairValue(ValuePtr l, ValuePtr r): 
-        left(std::move(l)), right(std::move(r)) {}
+        car(std::move(l)), cdr(std::move(r)) {}
     std::string toString() const override;
     std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
