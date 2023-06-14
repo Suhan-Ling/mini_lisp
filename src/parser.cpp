@@ -52,36 +52,27 @@ ValuePtr Parser::parseTails() {
     if (tokens.empty()) {
         throw SyntaxError("Unexpected end of input.");
     }
-
     if (tokens.front()->getType() == TokenType::RIGHT_PAREN) {
         tokens.pop_front();
         return std::make_shared<NilValue>();
     }
-
     auto car = this->parse();
-
     if (tokens.empty()) {
         throw SyntaxError("Unexpected end of input.");
     }
-
     if (tokens.front()->getType() == TokenType::DOT) {
         tokens.pop_front();
-
         auto cdr = this->parse();
-
         if (tokens.empty()) {
             throw SyntaxError("Unexpected end of input.");
         }
-
         if (tokens.front()->getType() != TokenType::RIGHT_PAREN) {
             throw SyntaxError("Expected ')' after '.'.");
         }
         tokens.pop_front();
-
         return std::make_shared<PairValue>(car, cdr);
     } else {
         auto cdr = this->parseTails();
-
         return std::make_shared<PairValue>(car, cdr);
     }
 }

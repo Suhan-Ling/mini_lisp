@@ -23,7 +23,25 @@ const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
     {"let",         letForm}
 };
 
+void operandsLengthCheck(int len, int min, int max) {
+    if (min != -1) {
+        if (len < min) {
+            throw LispError("Too few operands: "
+                            + std::to_string(len) + " < "
+                            + std::to_string(min) + ".");
+        }
+    }
+    if (max != -1) {
+        if (len > max) {
+            throw LispError("Too many operands: "
+                            + std::to_string(len) + " > "
+                            + std::to_string(max) + ".");
+        }
+    }
+}
+
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    operandsLengthCheck(args.size(), 2, -1);
     if (auto name = args[0]->asSymbol()) {      // variable
         env.defineBinding(*name, args[1]);
         return std::make_shared<NilValue>();
@@ -44,6 +62,7 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    operandsLengthCheck(args.size(), 2, -1);
     std::vector<std::string> params;
     for (auto i: args[0]->toVector()) {
         params.push_back(i->toString());
@@ -54,18 +73,36 @@ ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    operandsLengthCheck(args.size(), 1, 1);
     return args[0];
 }
 
 ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-
+    operandsLengthCheck(args.size(), 1, 1);
+    ValuePtr result = args[0];
+    ValuePtr car, cdr;
+    if (result->isPair()) {
+        car = result->getCar();
+        cdr = result->getCdr();
+        if (car->toString() == "unquote") {
+            result = env.eval(cdr->getCar());
+        } else {
+            result = std::make_shared<PairValue>(
+                quasiquoteForm(std::vector<ValuePtr>(1, car), env),
+                quasiquoteForm(std::vector<ValuePtr>(1, cdr), env)
+            );
+        }
+    }
+    return result;
 }
 
 ValuePtr unquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    
+    operandsLengthCheck(args.size(), 1, 1);
+    return env.eval(args[0]);
 }
 
 ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    operandsLengthCheck(args.size(), 2, 3);
     if (env.eval(args[0])->toString() == "#f") {
         return env.eval(args[2]);
     } else {
@@ -74,7 +111,31 @@ ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    
+    ValuePtr result = std::make_shared<NilValue>();
+    std::vector<ValuePtr> list;
+    for (auto i: args) {
+        list = i->listToVector();
+        operandsLengthCheck(list.size(), 1, -1);
+        if (list[0]->toString() == "else") {
+            if (i != *args.rbegin()) {
+                throw LispError("Else clause must be the last one.");
+            }
+            list.erase(list.begin());
+            for (auto j: list) {
+                result = env.eval(j);
+            }
+            break;
+        }
+        result = env.eval(list[0]);
+        if (result->toString() != "#f") {
+            list.erase(list.begin());
+            for (auto j: list) {
+                result = env.eval(j);
+            }
+            break;
+        }
+    }
+    return result;
 }
 
 ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
@@ -101,9 +162,32 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    
+    ValuePtr result = std::make_shared<NilValue>();
+    for (auto i: args) {
+        result = env.eval(i);
+    }
+    return result;
 }
 
 ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    
+    int len = args.size();
+    operandsLengthCheck(len, 2, -1);
+    EnvPtr envChild = EvalEnv::createChild(env.shared_from_this());
+    std::vector<ValuePtr> params = args[0]->listToVector();
+    for (auto i: params) {
+        std::vector<ValuePtr> bond = i->toVector();
+        operandsLengthCheck(bond.size(), 2, -1);
+        if (auto name = bond[0]->asSymbol()) {
+            envChild->defineBinding(*name, env.eval(bond[1]));
+        } else {
+            defineForm(bond, *envChild);
+        }
+    }    
+    ValuePtr result = std::make_shared<NilValue>();    
+    for (auto j: args) {
+        if (j != args[0]) {
+            result = envChild->eval(j);
+        }
+    }
+    return result;
 }

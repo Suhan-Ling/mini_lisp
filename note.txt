@@ -15,7 +15,8 @@
         modulo()；
         remainder()。
 5、 实现了一些拓展内容。例如：
-        map()允许proc接收多个参数（缺省为1个）；
+        map()允许proc接收多个参数；
+        letForm中允许定义局部lambda；
 6、
 7、
 8、
