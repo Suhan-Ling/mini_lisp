@@ -9,10 +9,15 @@
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 
 SpecialFormType defineForm;
+SpecialFormType lambdaForm;
 SpecialFormType quoteForm;
+SpecialFormType quasiquoteForm;
+SpecialFormType unquoteForm;
 SpecialFormType ifForm;
+SpecialFormType condForm;
 SpecialFormType andForm;
 SpecialFormType orForm;
-SpecialFormType lambdaForm;
+SpecialFormType beginForm;
+SpecialFormType letForm;
 
 #endif

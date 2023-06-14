@@ -79,11 +79,21 @@ void lengthCheck(int len, int min, int max) {
 }
 
 ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    lengthCheck(params.size(), 2, 2);
+    return params[0]->apply(params[1]->listToVector(), env);
 }
 
 ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    std::string str;
+    for (auto i: params) {
+        str = i->toString();
+        if (i->isString()) {
+            str.erase(str.begin());
+            str.pop_back();
+        }
+        std::cout << str;
+    }
+    return std::make_shared<NilValue>();
 }
 
 ValuePtr __displayln(const std::vector<ValuePtr>& params, EvalEnv& env) {

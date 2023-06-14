@@ -10,12 +10,17 @@
 #include <algorithm>
 
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS {
-    {"define",  defineForm},
-    {"quote",   quoteForm},
-    {"if",      ifForm},
-    {"and",     andForm},
-    {"or",      orForm},
-    {"lambda",  lambdaForm}
+    {"define",      defineForm},
+    {"lambda",      lambdaForm},
+    {"quasiquote",  quasiquoteForm},
+    {"unquote",     unquoteForm},
+    {"quote",       quoteForm},
+    {"if",          ifForm},
+    {"cond",        condForm},
+    {"and",         andForm},
+    {"or",          orForm},
+    {"begin",       beginForm},
+    {"let",         letForm}
 };
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
@@ -38,8 +43,26 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     }
 }
 
+ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    std::vector<std::string> params;
+    for (auto i: args[0]->toVector()) {
+        params.push_back(i->toString());
+    }
+    std::vector<ValuePtr> body = args;
+    body.erase(body.begin());
+    return std::make_shared<LambdaValue>(params, body, env.shared_from_this());
+}
+
 ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return args[0];
+}
+
+ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+
+}
+
+ValuePtr unquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    
 }
 
 ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
@@ -48,6 +71,10 @@ ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     } else {
         return env.eval(args[1]);
     }
+}
+
+ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    
 }
 
 ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
@@ -73,12 +100,10 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return std::make_shared<BooleanValue>(false);
 }
 
-ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    std::vector<std::string> params;
-    for (auto i: args[0]->toVector()) {
-        params.push_back(i->toString());
-    }
-    std::vector<ValuePtr> body = args;
-    body.erase(body.begin());
-    return std::make_shared<LambdaValue>(params, body, env.shared_from_this());
+ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    
+}
+
+ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    
 }
