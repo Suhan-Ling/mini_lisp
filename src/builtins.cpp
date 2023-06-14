@@ -1,5 +1,6 @@
 #include "./value.h"
 #include "./error.h"
+#include "./eval_env.h"
 #include "./builtins.h"
 
 #include <iostream>
@@ -97,23 +98,39 @@ ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __displayln(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    __display(params, env);
+    __newline(params, env);
+    return std::make_shared<NilValue>();
 }
 
 ValuePtr __error(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    int len = params.size();
+    argumentsLengthCheck(len, -1, 1);
+    if (len == 1) {
+        throw LispError(params[0]->toString());
+    } else {
+        throw LispError("");
+    }
 }
 
 ValuePtr __eval(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    argumentsLengthCheck(params.size(), 1, 1);
+    return env.eval(params[0]);
 }
 
 ValuePtr __exit(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    int len = params.size();
+    argumentsLengthCheck(len, -1, 1);
+    int code = 0;
+    if (len == 1) {
+        code = params[0]->asNumber();
+    }
+    exit(code);
 }
 
 ValuePtr __newline(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    std::cout << std::endl;
+    return std::make_shared<NilValue>();
 }
 
 ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
