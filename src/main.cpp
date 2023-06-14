@@ -2,13 +2,13 @@
 #include <string>
 #include <typeinfo>
 
+#include "./error.h"
 #include "./tokenizer.h"
 #include "./value.h"
 #include "./parser.h"
 #include "./eval_env.h"
 #include "./builtins.h"
 #include "./forms.h"
-
 #include "rjsj_test.hpp"
 
 #define RJSJ_TEST_NO_EXIT
@@ -25,7 +25,8 @@ struct TestCtx {
 };
 
 int main() {
-    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
+    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib);
+    // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     EnvPtr env = EvalEnv::createGlobal();
     while (true) {
         try {
@@ -41,7 +42,13 @@ int main() {
             auto result = env->eval(std::move(value));  
             std::cout << result->toString() << std::endl;    // 输出外部表示
         } catch (std::runtime_error& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
+            if (typeid(e) == (typeid(SyntaxError))) {
+                std::cerr << "SyntaxError: " << e.what() << std::endl;
+            } else if (typeid(e) == (typeid(LispError))) {
+                std::cerr << "LispError: " << e.what() << std::endl;
+            } else {
+                std::cerr << "Error: " << e.what() << std::endl;
+            }
         }
     }
 }

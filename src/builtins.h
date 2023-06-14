@@ -45,11 +45,11 @@ BuiltinFuncType __add;
 BuiltinFuncType __substract;
 BuiltinFuncType __multiply;
 BuiltinFuncType __divide;
-// BuiltinFuncType __abs;
-// BuiltinFuncType __expt;
-// BuiltinFuncType __quotient;
-// BuiltinFuncType __modulo;
-// BuiltinFuncType __remainder;
+BuiltinFuncType __abs;
+BuiltinFuncType __expt;
+BuiltinFuncType __quotient;
+BuiltinFuncType __modulo;
+BuiltinFuncType __remainder;
 
 BuiltinFuncType __eq_;
 BuiltinFuncType __equal_;
