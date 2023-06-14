@@ -8,7 +8,7 @@
 #include "./builtins.h"
 
 class EvalEnv: public std::enable_shared_from_this<EvalEnv> {
-public:
+private:
     std::unordered_map<std::string, ValuePtr> symbolTable;
     EnvPtr parent;
     EvalEnv();
@@ -17,7 +17,7 @@ public:
     static EnvPtr createGlobal();
     static EnvPtr createChild(EnvPtr p);
     ValuePtr eval(ValuePtr expr);
-    ValuePtr apply(ValuePtr proc, std::vector<ValuePtr> args);
+    ValuePtr apply(ValuePtr proc, std::vector<ValuePtr>& args);
     std::vector<ValuePtr> evalList(ValuePtr expr);
     void defineBinding(std::string name, ValuePtr v);
     ValuePtr lookupBinding(std::string name);

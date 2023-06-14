@@ -37,7 +37,7 @@ int main() {
                 std::exit(0);
             }
             auto tokens = Tokenizer::tokenize(line);
-            Parser parser(std::move(tokens));
+            Parser parser(std::move(tokens)); 
             auto value = parser.parse();
             auto result = env->eval(std::move(value));  
             std::cout << result->toString() << std::endl;
