@@ -31,13 +31,16 @@ public:
     bool isProc() const;
     bool isLambda() const;
     bool isSelfEvaluating() const;
+    virtual bool isList() const;
     virtual std::vector<ValuePtr> toVector() const;
+    virtual std::vector<ValuePtr> listToVector() const;
+    virtual int listLength() const;
     virtual std::optional<std::string> asSymbol() const;
     virtual double asNumber() const;
     virtual ValuePtr getCar() const;
     virtual ValuePtr getCdr() const;
-    virtual ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env);
     virtual std::string getType() const = 0;
+    virtual ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env) const;
 };
 
 
@@ -87,20 +90,21 @@ public:
     std::optional<std::string> asSymbol() const;
 };
 
-
 class PairValue: public Value {
     ValuePtr car;
     ValuePtr cdr;
 public:
     PairValue(ValuePtr l, ValuePtr r): 
         car(std::move(l)), cdr(std::move(r)) {}
+    bool isList() const;
     std::string toString() const override;
     std::string getType() const override;
     std::vector<ValuePtr> toVector() const;
+    std::vector<ValuePtr> listToVector() const;
+    int listLength() const;
     ValuePtr getCar() const;
     ValuePtr getCdr() const;
 };
-
 
 class BuiltinProcValue : public Value {
     BuiltinFuncType* func;
@@ -108,7 +112,7 @@ public:
     BuiltinProcValue(BuiltinFuncType* f): func(f) {}
     std::string toString() const override;
     std::string getType() const override;
-    ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env);
+    ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env) const;
 };
 
 class LambdaValue : public Value {
@@ -122,7 +126,7 @@ public:
                 params {p}, body{b}, env {std::move(e)} {}
     std::string toString() const override;
     std::string getType() const override;
-    ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env);
+    ValuePtr apply(const std::vector<ValuePtr>& args, EvalEnv& env) const;
 };
 
 #endif

@@ -45,6 +45,10 @@ bool Value::isLambda() const {
     return (typeid(*this) == typeid(LambdaValue));
 }
 
+bool Value::isList() const {
+    return (typeid(*this) == typeid(NilValue));
+}
+
 bool Value::isSelfEvaluating() const {
     return (typeid(*this) == typeid(BooleanValue)) or
            (typeid(*this) == typeid(NumericValue)) or
@@ -55,6 +59,22 @@ bool Value::isSelfEvaluating() const {
 
 std::vector<ValuePtr> Value::toVector() const {
     throw LispError("Cannot convert to vector.");
+}
+
+std::vector<ValuePtr> Value::listToVector() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed list: expected pair or nil, got " +
+                        this->toString());
+    }
+    return std::vector<ValuePtr>();
+}
+
+int Value::listLength() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed list: expected pair or nil, got " +
+                        this->toString());
+    }
+    return 0;
 }
 
 std::optional<std::string> Value::asSymbol() const {
@@ -73,7 +93,7 @@ ValuePtr Value::getCdr() const {
     throw LispError("Not a pair value.");
 }
 
-ValuePtr Value::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr Value::apply(const std::vector<ValuePtr>& args, EvalEnv& env) const {
     throw LispError("Not a procedure.");
 }
 
@@ -155,6 +175,19 @@ std::string PairValue::toString() const {
     return "(" + left + right + ")";
 }
 
+bool PairValue::isList() const {
+    ValuePtr cdr = this->cdr;
+    while (1) {
+        if (cdr->isNil()) {
+            return true;
+        }
+        if (!cdr->isPair()) {
+            return false;
+        }
+        cdr = cdr->getCdr();
+    }
+}
+
 std::string PairValue::getType() const {
     return "PairValue";
 }
@@ -171,6 +204,43 @@ std::vector<ValuePtr> PairValue::toVector() const {
         result.push_back(cdr);
     }
     return result;
+}
+
+std::vector<ValuePtr> PairValue::listToVector() const {
+    ValuePtr car;
+    ValuePtr cdr = this->cdr;
+    std::vector<ValuePtr> result;
+    result.push_back(this->car);
+    while (1) {
+        if (cdr->isNil()) {
+            break;
+        }
+        if (!cdr->isPair()) {
+            throw LispError("Malformed list: expected pair or nil, got " +
+                            cdr->toString());
+        }
+        car = cdr->getCar();
+        cdr = cdr->getCdr();
+        result.push_back(car);
+    }
+    return result;
+}
+
+int PairValue::listLength() const {
+    int cnt = 1;
+    ValuePtr cdr = this->cdr;
+    while (1) {
+        if (cdr->isNil()) {
+            break;
+        }
+        if (!cdr->isPair()) {
+            throw LispError("Malformed list: expected pair or nil, got " +
+                            cdr->toString());
+        }
+        cnt++;
+        cdr = cdr->getCdr();
+    }
+    return cnt;
 }
 
 ValuePtr PairValue::getCar() const {
@@ -190,7 +260,7 @@ std::string BuiltinProcValue::getType() const {
     return "BuiltinProcValue";
 }
 
-ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) const{
     return func(args, env);
 }
 
@@ -202,7 +272,7 @@ std::string LambdaValue::getType() const {
     return "LambdaValue";
 }
 
-ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) {
+ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args, EvalEnv& env) const {
     EnvPtr envChild = EvalEnv::createChild(this->env);
     int paramsLen = params.size();
     int argsLen = args.size();

@@ -114,7 +114,7 @@ ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __atom_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     ValuePtr p = params[0];
     bool b;
     b = p->isBool() or
@@ -126,87 +126,57 @@ ValuePtr __atom_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __boolean_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isBool());
 }
 
 ValuePtr __integer_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     bool b = (params[0]->isNumber()) and 
              (params[0]->asNumber() == std::floor(params[0]->asNumber()));
     return std::make_shared<BooleanValue>(b);
 }
 
 ValuePtr __list_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
-    ValuePtr car;
-    ValuePtr cdr = params[0];
-    while (1) {
-        if (cdr->isNil()) {
-            return std::make_shared<BooleanValue>(true);
-        }
-        if (!cdr->isPair()) {
-            return std::make_shared<BooleanValue>(false);
-        }
-        car = cdr->getCar();
-        cdr = cdr->getCdr();
-    }
+    lengthCheck(params.size(), 1, 1);
+    return std::make_shared<BooleanValue>(params[0]->isList());
 }
 
 ValuePtr __number_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isNumber());
 }
 
 ValuePtr __null_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isNil());
 }
 
 ValuePtr __pair_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isPair());
 }
 
 ValuePtr __procedure_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     ValuePtr p = params[0];
     return std::make_shared<BooleanValue>((p->isProc()) or (p->isLambda()));
 }
 
 ValuePtr __string_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isString());
 }
 
 ValuePtr __symbol_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->isSymbol());
-}
-
-std::vector<ValuePtr> convertList2Vector(ValuePtr list) {
-    std::vector<ValuePtr> result;
-    ValuePtr car;
-    ValuePtr cdr = list;
-    while (1) {
-        if (cdr->isNil()) {
-            break;
-        }
-        if (!cdr->isPair()) {
-            throw LispError("Malformed list: expected pair or nil, got " +
-                            cdr->toString());
-        }
-        car = cdr->getCar();
-        cdr = cdr->getCdr();
-        result.push_back(car);
-    }
-    return result;
 }
 
 ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
     std::vector<ValuePtr> elements, vec;
     for (auto i: params) {
-        vec = convertList2Vector(i);
+        vec = i->listToVector();
         for (auto j: vec) {
             elements.push_back(j);
         }
@@ -215,38 +185,23 @@ ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __car(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return params[0]->getCar();
 }
 
 ValuePtr __cdr(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return params[0]->getCdr();
 }
 
 ValuePtr __cons(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     return std::make_shared<PairValue>(params[0], params[1]);
 }
 
 ValuePtr __length(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
-    int cnt = 0;
-    ValuePtr car;
-    ValuePtr cdr = params[0];
-    while (1) {
-        if (cdr->isNil()) {
-            break;
-        }
-        if (!cdr->isPair()) {
-            throw LispError("Malformed list: expected pair or nil, got " +
-                            cdr->toString());
-        }
-        cnt++;
-        car = cdr->getCar();
-        cdr = cdr->getCdr();
-    }
-    return std::make_shared<NumericValue>(cnt);
+    lengthCheck(params.size(), 1, 1);
+    return std::make_shared<NumericValue>(params[0]->listLength());
 }
 
 ValuePtr __list(const std::vector<ValuePtr>& params, EvalEnv& env) {
@@ -261,7 +216,7 @@ ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
     int len = params.size();
     lengthCheck(len, 2, 3);
     ValuePtr proc = params[0];
-    std::vector<ValuePtr> args = convertList2Vector(params[1]);
+    std::vector<ValuePtr> args = params[1]->listToVector();
     int argc = 1;
     if (len == 3) {
         argc = params[2]->asNumber();
@@ -274,11 +229,35 @@ ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __filter(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    lengthCheck(params.size(), 2, 2);
+    ValuePtr proc = params[0];
+    std::vector<ValuePtr> args = params[1]->listToVector();
+    std::vector<ValuePtr> result;
+    for (auto i: args) {
+        if (proc->apply(std::vector<ValuePtr>(1, i), env)->toString() != "#f") {
+            result.push_back(i);
+        }        
+    }
+    return __list(result, env);
 }
 
 ValuePtr __reduce(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return std::make_shared<NilValue>();                                            // noooooo
+    lengthCheck(params.size(), 2, 2);
+    ValuePtr proc = params[0];
+    ValuePtr list = params[1];
+    if (!list->isList()) {
+        throw LispError("Reduce's second argument must be a list.");
+    }
+    int len = list->listLength();
+    if (len > 1) {
+        std::vector<ValuePtr> second {proc, list->getCdr()};
+        std::vector<ValuePtr> args {list->getCar(), __reduce(second, env)};
+        return proc->apply(args, env);
+    } else if (len == 1) {
+        return list->getCar();
+    } else {    // len == 0
+        throw LispError("Reduce list must has at least 1 element.");
+    }
 }
 
 ValuePtr addAndMultiply(const std::vector<ValuePtr>& params, double result, 
@@ -327,27 +306,27 @@ ValuePtr __divide(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __abs(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     double x = params[0]->asNumber();
     return std::make_shared<NumericValue>(fabs(x));
 }
 
 ValuePtr __expt(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     double x = params[0]->asNumber();
     double y = params[1]->asNumber();
     return std::make_shared<NumericValue>(pow(x, y));
 }
 
 ValuePtr __quotient(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     double x = params[0]->asNumber();
     double y = params[1]->asNumber();
     return std::make_shared<NumericValue>(int(x / y));
 }
 
 ValuePtr __modulo(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     double x = params[0]->asNumber();
     double y = params[1]->asNumber();
     int z = floor(x / y);
@@ -355,7 +334,7 @@ ValuePtr __modulo(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __remainder(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     double x = params[0]->asNumber();
     double y = params[1]->asNumber();
     int z = int(x / y);
@@ -363,7 +342,7 @@ ValuePtr __remainder(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __eq_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     ValuePtr p = params[0];
     ValuePtr q = params[1];
     if (p->isBool()     or  q->isBool()     or
@@ -378,23 +357,20 @@ ValuePtr __eq_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __equal_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 2, -1);
+    lengthCheck(params.size(), 2, 2);
     bool b = (params[0]->toString().compare(params[1]->toString()));
     return std::make_shared<BooleanValue>(!b);
 }
 
 ValuePtr __not(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     bool b = (params[0]->toString() == "#f");
     return std::make_shared<BooleanValue>(b);
 }
 
 ValuePtr compare(const std::vector<ValuePtr>& params, compareFuncType* comp) {
-    lengthCheck(params.size(), 2, -1);
     int len = params.size();
-    if (len < 2) {
-        throw LispError("Too few arguments: " + std::to_string(len) + " < 2.");
-    }
+    lengthCheck(len, 2, 2);
     double x = params[0]->asNumber();
     double y = params[1]->asNumber();
     return std::make_shared<BooleanValue>(comp(x, y));
@@ -421,18 +397,18 @@ ValuePtr __lessOrEqual(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __even_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     double x = params[0]->asNumber();
     return std::make_shared<BooleanValue>(isInt(x) && (int(x) % 2 == 0));
 }
 
 ValuePtr __odd_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     double x = params[0]->asNumber();
     return std::make_shared<BooleanValue>(isInt(x) && !(int(x) % 2 == 0));
 }
 
 ValuePtr __zero_(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    lengthCheck(params.size(), 1, -1);
+    lengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->asNumber() == 0);
 }
