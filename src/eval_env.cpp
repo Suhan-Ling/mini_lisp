@@ -77,7 +77,7 @@ std::vector<ValuePtr> EvalEnv::evalList(ValuePtr expr) {
 }
 
 void EvalEnv::defineBinding(std::string name, ValuePtr value) {
-    symbolTable[name] = eval(value);
+    symbolTable[name] = value;
 }
 
 ValuePtr EvalEnv::lookupBinding(std::string name) {

@@ -43,7 +43,7 @@ void operandsLengthCheck(int len, int min, int max) {
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     operandsLengthCheck(args.size(), 2, -1);
     if (auto name = args[0]->asSymbol()) {      // variable
-        env.defineBinding(*name, args[1]);
+        env.defineBinding(*name, env.eval(args[1]));
         return std::make_shared<NilValue>();
     } else if (args[0]->isPair()) {             // lambda
         std::string lambdaName = args[0]->getCar()->toString();

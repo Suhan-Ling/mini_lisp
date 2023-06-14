@@ -1,23 +1,25 @@
 创新点：
 1、 定义了一些实用接口。例如：
         每种Value都定义了Value::isXXX()成员函数来判断类型；
-        定义了Value::getType()，方便debug时直接打印类型。
+        定义了Value::getType()，方便debug时直接打印类型；
 2、 大量复用代码。例如：
         将一些多次用到，且对可读性要求较低的类型using成更简便的表达式；
         将异常统一到Value基类里抛，通过getType()或toString()统一地输出异常内容，避免反复写报错信息；
         用统一、整齐的方式写内置函数和特殊类型的定义，只暴露unordered_map接口；
-        用lengthCheck()完成所有参数个数的检查；
+        用xxxxxxLengthCheck()完成所有参数个数的检查；
         同类的内置函数复用binaryOperatorFunc(), compareFunc(), listToVector()，listLength()等代码；
 3、 类、函数、变量命名方式统一、清晰。
     逻辑结构相似的代码书写结构也相似，让读者有熟悉感。
 4、 较为简便地实现了一些函数。例如：
         PairValue::toString()；
         modulo()；
-        remainder()。
+        remainder()；
 5、 实现了一些拓展内容。例如：
         map()允许proc接收多个参数；
         letForm中允许定义局部lambda；
-6、
+6、 捉样例解释器小虫：
+        (define x 1 2)，异常信息大于小于号写反了；
+        cond特殊形式，没有全部求值；
 7、
 8、
 9、
