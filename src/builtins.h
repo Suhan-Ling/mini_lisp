@@ -42,7 +42,7 @@ BuiltinFuncType __filter;
 BuiltinFuncType __reduce;
 
 BuiltinFuncType __add;
-BuiltinFuncType __substract;
+BuiltinFuncType __minus;
 BuiltinFuncType __multiply;
 BuiltinFuncType __divide;
 BuiltinFuncType __abs;
@@ -62,5 +62,34 @@ BuiltinFuncType __lessOrEqual;
 BuiltinFuncType __even_;
 BuiltinFuncType __odd_;
 BuiltinFuncType __zero_;
+
+// string
+BuiltinFuncType __string;
+BuiltinFuncType __atoi;
+BuiltinFuncType __strlen;
+
+// list
+BuiltinFuncType __index;
+BuiltinFuncType __insert;
+BuiltinFuncType __erase;
+
+// math
+BuiltinFuncType __pow;
+BuiltinFuncType __log;
+BuiltinFuncType __ln;
+BuiltinFuncType __log2;
+
+// matrix
+BuiltinFuncType __matrix;
+BuiltinFuncType __matrix_;
+BuiltinFuncType __sub;
+BuiltinFuncType __shape;
+// BuiltinFuncType __trans;
+// BuiltinFuncType __det;
+// BuiltinFuncType __minor;
+// BuiltinFuncType __rank;
+// BuiltinFuncType __inv;
+// BuiltinFuncType __eig;
+// BuiltinFuncType __;
 
 #endif

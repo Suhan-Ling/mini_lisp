@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <unordered_map>
+#include <stdlib.h>
 
 const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"apply",       &__apply},	
@@ -40,7 +41,7 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"reduce",      &__reduce},
 
     {"+",           &__add},
-    {"-",           &__substract},
+    {"-",           &__minus},
     {"*",           &__multiply}, 
     {"/",           &__divide},
     {"abs",         &__abs},
@@ -59,7 +60,23 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"<=",          &__lessOrEqual},
     {"even?",       &__even_},
     {"odd?",        &__odd_},
-    {"zero?",       &__zero_}
+    {"zero?",       &__zero_},
+
+    {"string",      &__string},
+    {"atoi",        &__atoi},
+    {"strlen",      &__strlen},
+
+    {"index",       &__index},
+    {"insert",      &__insert},
+    {"erase",       &__erase},
+
+    {"pow",         &__pow},
+    {"log",         &__log},
+    {"ln",          &__ln},
+    {"log2",        &__log2},
+
+    {"matrix",      &__matrix},
+    {"matrix?",     &__matrix_},
 };
 
 void argumentsLengthCheck(int len, int min, int max) {
@@ -305,7 +322,7 @@ ValuePtr __multiply(const std::vector<ValuePtr>& params, EvalEnv& env) {
                             [](double x, double y) -> double {return x * y;});
 }
 
-ValuePtr substractAndDivide(const std::vector<ValuePtr>& params, 
+ValuePtr minusAndDivide(const std::vector<ValuePtr>& params, 
                             double defaultValue, binaryOperatorFuncType func) {
     int len = params.size();
     argumentsLengthCheck(len, 1, 2);
@@ -319,8 +336,8 @@ ValuePtr substractAndDivide(const std::vector<ValuePtr>& params,
     }
 }
 
-ValuePtr __substract(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    return substractAndDivide(params, 0, 
+ValuePtr __minus(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    return minusAndDivide(params, 0, 
                             [](double x, double y) -> double {return x - y;});
 }
 
@@ -328,7 +345,7 @@ ValuePtr __divide(const std::vector<ValuePtr>& params, EvalEnv& env) {
     if ((params.size() == 2) and (params[1]->asNumber() == 0)) {
         throw LispError("Cannot divide 0.");
     }
-    return substractAndDivide(params, 1, 
+    return minusAndDivide(params, 1, 
                             [](double x, double y) -> double {return x / y;});
 }
 
@@ -438,4 +455,93 @@ ValuePtr __odd_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 ValuePtr __zero_(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 1, 1);
     return std::make_shared<BooleanValue>(params[0]->asNumber() == 0);
+}
+
+ValuePtr __string(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    std::string result = "";
+    std::string s;
+
+    for (auto i: params) {
+        s = i->toString();
+        if (i->isString()) {
+            s.erase(s.begin());
+            s.erase(s.end() - 1);
+        }
+        result += s;
+    }
+    return std::make_shared<StringValue>(result);
+}
+
+
+ValuePtr __atoi(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    std::string s = params[0]->toString();
+    s.erase(s.begin());
+    s.erase(s.end() - 1);
+    return std::make_shared<NumericValue>(atoi(s.c_str()));
+}
+
+ValuePtr __strlen(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return std::make_shared<NumericValue>(params[0]->toString().size() - 2);
+}
+
+ValuePtr __index(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 2, 2);
+    std::vector<ValuePtr> list = params[0]->listToVector();
+    int index = params[1]->asNumber();
+    if ((index < 0) or (index >= list.size())) {
+        throw LispError("Index out of range.");
+    }
+    return list[index];
+}
+
+ValuePtr __insert(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 3, 3);
+    std::vector<ValuePtr> list = params[0]->listToVector();
+    int index = params[1]->asNumber();
+    if ((index < 0) or (index >= list.size())) {
+        throw LispError("Index out of range.");
+    }
+    list.insert(list.begin() + index, params[2]);
+    return __list(list, env);
+}
+
+ValuePtr __erase(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 2, 2);
+    std::vector<ValuePtr> list = params[0]->listToVector();
+    int index = params[1]->asNumber();
+    if ((index < 0) or (index >= list.size())) {
+        throw LispError("Index out of range.");
+    }
+    list.erase(list.begin() + index);
+    return __list(list, env);
+}
+
+ValuePtr __pow(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 2, 2);
+    return std::make_shared<NumericValue>(
+        pow(params[0]->asNumber(), params[1]->asNumber()));
+}
+
+ValuePtr __log(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 2, 2);
+    return std::make_shared<NumericValue>(
+        log(params[1]->asNumber()) / log(params[0]->asNumber()));
+}
+
+ValuePtr __ln(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return std::make_shared<NumericValue>(
+        log(params[0]->asNumber()));
+}
+
+ValuePtr __log2(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return std::make_shared<NumericValue>(
+        log(params[0]->asNumber()) / log(2));
+}
+
+ValuePtr __matrix(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    
 }
