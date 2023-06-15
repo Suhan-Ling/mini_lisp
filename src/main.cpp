@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 #include <typeinfo>
 #include <unistd.h>
 #include <stdio.h>
@@ -37,8 +38,16 @@ int main(int argc, char* argv[]) {
             if (repl) {
                 std::cout << ">>> " ;
             }
-            std::string line;
-            std::getline(std::cin, line);
+            std::string line = "";
+            std::string tail;
+            int leftCnt = 0;
+            int rightCnt = -1;
+            while ((!std::cin.eof()) and (leftCnt != rightCnt)) {
+                std::getline(std::cin, tail);
+                line += tail.substr(0, tail.find(";"));
+                leftCnt = std::count(line.begin(), line.end(), '(');
+                rightCnt = std::count(line.begin(), line.end(), ')');
+            }
             if (std::cin.eof()) {
                 std::exit(0);
             }
