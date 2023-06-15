@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <typeinfo>
 
@@ -24,12 +25,19 @@ struct TestCtx {
     }
 };
 
-int main() {
-    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
+void printHelp() {
+    
+}
+
+int main(int argc, char* argv[]) {
+    // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     EnvPtr env = EvalEnv::createGlobal();
+    ifstream inPut = std::cin;
     while (true) {
         try {
-            std::cout << ">>> " ;
+            if (argc == 1) {
+                std::cout << ">>> " ;
+            }
             std::string line;
             std::getline(std::cin, line);
             if (std::cin.eof()) {
@@ -39,7 +47,9 @@ int main() {
             Parser parser(std::move(tokens)); 
             auto value = parser.parse();
             auto result = env->eval(std::move(value));  
-            std::cout << result->toString() << std::endl;
+            if (argc == 1) {
+                std::cout << result->toString() << std::endl;
+            }
         } catch (std::runtime_error& e) {
             if (typeid(e) == (typeid(SyntaxError))) {
                 std::cerr << "SyntaxError: " << e.what() << std::endl;
