@@ -134,7 +134,7 @@ ValuePtr __newline(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __print(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    for (const auto& i: params) {
+    for (const auto i: params) {
         std::cout << i->toString() << std::endl;
     }
     return std::make_shared<NilValue>();

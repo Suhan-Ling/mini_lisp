@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <typeinfo>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "./error.h"
 #include "./tokenizer.h"
@@ -25,17 +28,13 @@ struct TestCtx {
     }
 };
 
-void printHelp() {
-    
-}
-
 int main(int argc, char* argv[]) {
     // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     EnvPtr env = EvalEnv::createGlobal();
-    ifstream inPut = std::cin;
+    bool repl = isatty(fileno(stdin));
     while (true) {
         try {
-            if (argc == 1) {
+            if (repl) {
                 std::cout << ">>> " ;
             }
             std::string line;
@@ -47,7 +46,7 @@ int main(int argc, char* argv[]) {
             Parser parser(std::move(tokens)); 
             auto value = parser.parse();
             auto result = env->eval(std::move(value));  
-            if (argc == 1) {
+            if (repl) {
                 std::cout << result->toString() << std::endl;
             }
         } catch (std::runtime_error& e) {
