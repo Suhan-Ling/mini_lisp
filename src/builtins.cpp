@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <stdlib.h>
+#include <iomanip>
 
 const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
     {"apply",       &__apply},	
@@ -77,6 +78,11 @@ const std::unordered_map<std::string, BuiltinFuncType*> BUILTIN_PROCS = {
 
     {"matrix",      &__matrix},
     {"matrix?",     &__matrix_},
+    {"asmat",       &__asmat},
+    {"sub",         &__sub},
+    {"shape",       &__shape},
+    {"minor",       &__minor},
+    {"det",         &__det},
 };
 
 void argumentsLengthCheck(int len, int min, int max) {
@@ -98,7 +104,7 @@ void argumentsLengthCheck(int len, int min, int max) {
 
 ValuePtr __apply(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 2, 2);
-    return params[0]->apply(params[1]->listToVector(), env);
+    return params[0]->apply(params[1]->asList(), env);
 }
 
 ValuePtr __display(const std::vector<ValuePtr>& params, EvalEnv& env) {
@@ -220,7 +226,7 @@ ValuePtr __symbol_(const std::vector<ValuePtr>& params, EvalEnv& env) {
 ValuePtr __append(const std::vector<ValuePtr>& params, EvalEnv& env) {
     std::vector<ValuePtr> elements, vec;
     for (auto i: params) {
-        vec = i->listToVector();
+        vec = i->asList();
         for (auto j: vec) {
             elements.push_back(j);
         }
@@ -245,7 +251,7 @@ ValuePtr __cons(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 ValuePtr __length(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 1, 1);
-    return std::make_shared<NumericValue>(params[0]->listLength());
+    return std::make_shared<NumericValue>(params[0]->length());
 }
 
 ValuePtr __list(const std::vector<ValuePtr>& params, EvalEnv& env) {
@@ -260,7 +266,7 @@ ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
     int len = params.size();
     argumentsLengthCheck(len, 2, 3);
     ValuePtr proc = params[0];
-    std::vector<ValuePtr> args = params[1]->listToVector();
+    std::vector<ValuePtr> args = params[1]->asList();
     int argc = 1;
     if (len == 3) {
         argc = params[2]->asNumber();
@@ -275,7 +281,7 @@ ValuePtr __map(const std::vector<ValuePtr>& params, EvalEnv& env) {
 ValuePtr __filter(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 2, 2);
     ValuePtr proc = params[0];
-    std::vector<ValuePtr> args = params[1]->listToVector();
+    std::vector<ValuePtr> args = params[1]->asList();
     std::vector<ValuePtr> result;
     for (auto i: args) {
         if (proc->apply(std::vector<ValuePtr>(1, i), env)->toString() != "#f") {
@@ -292,7 +298,7 @@ ValuePtr __reduce(const std::vector<ValuePtr>& params, EvalEnv& env) {
     if (!list->isList()) {
         throw LispError("Reduce's second argument must be a list.");
     }
-    int len = list->listLength();
+    int len = list->length();
     if (len > 1) {
         std::vector<ValuePtr> second {proc, list->getCdr()};
         std::vector<ValuePtr> args {list->getCar(), __reduce(second, env)};
@@ -488,7 +494,7 @@ ValuePtr __strlen(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 ValuePtr __index(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 2, 2);
-    std::vector<ValuePtr> list = params[0]->listToVector();
+    std::vector<ValuePtr> list = params[0]->asList();
     int index = params[1]->asNumber();
     if ((index < 0) or (index >= list.size())) {
         throw LispError("Index out of range.");
@@ -498,7 +504,7 @@ ValuePtr __index(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 ValuePtr __insert(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 3, 3);
-    std::vector<ValuePtr> list = params[0]->listToVector();
+    std::vector<ValuePtr> list = params[0]->asList();
     int index = params[1]->asNumber();
     if ((index < 0) or (index >= list.size())) {
         throw LispError("Index out of range.");
@@ -509,7 +515,7 @@ ValuePtr __insert(const std::vector<ValuePtr>& params, EvalEnv& env) {
 
 ValuePtr __erase(const std::vector<ValuePtr>& params, EvalEnv& env) {
     argumentsLengthCheck(params.size(), 2, 2);
-    std::vector<ValuePtr> list = params[0]->listToVector();
+    std::vector<ValuePtr> list = params[0]->asList();
     int index = params[1]->asNumber();
     if ((index < 0) or (index >= list.size())) {
         throw LispError("Index out of range.");
@@ -543,5 +549,54 @@ ValuePtr __log2(const std::vector<ValuePtr>& params, EvalEnv& env) {
 }
 
 ValuePtr __matrix(const std::vector<ValuePtr>& params, EvalEnv& env) {
-    
+    argumentsLengthCheck(params.size(), 1, -1);
+    ValuePtr mat = __list(params, env);
+    std::cout << mat->toString() << std::endl;
+    if (!mat->isMatrix()) {
+        throw LispError("Cannot convert to a matrix.");
+    }
+    return mat;
+}
+
+ValuePtr __matrix_(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return std::make_shared<BooleanValue>(params[0]->isMatrix());
+}
+
+ValuePtr __asmat(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    if (!params[0]->isMatrix()) {
+        throw LispError("Not a matrix.");
+    }
+    std::vector<ValuePtr> row = params[0]->asRow();
+    for (auto i: row) {
+        std::vector<ValuePtr> list = i->asList();
+        for (auto j: list) {
+            std::cout << std::setw(5) << j->asNumber();
+        }
+        std::cout << std::endl;
+    }
+    return std::make_shared<NilValue>();
+}
+
+ValuePtr __sub(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 3, 3);
+    return std::make_shared<NumericValue>(
+            params[0]->sub(params[1]->asNumber(), params[2]->asNumber()));
+}
+
+ValuePtr __shape(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return params[0]->shape();
+}
+
+ValuePtr __minor(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 3, 3);
+    return params[0]->minor(params[1]->asNumber(),
+                            params[2]->asNumber());
+}
+
+ValuePtr __det(const std::vector<ValuePtr>& params, EvalEnv& env) {
+    argumentsLengthCheck(params.size(), 1, 1);
+    return std::make_shared<NumericValue>(params[0]->det());
 }

@@ -32,9 +32,18 @@ public:
     bool isLambda() const;
     bool isSelfEvaluating() const;
     virtual bool isList() const;
+    virtual bool isMatrix() const;
+    virtual int length() const;
+    virtual ValuePtr shape() const;
+    virtual void checkRange(int x, int y) const;
+    virtual int rowNum() const;
+    virtual int colNum() const;
+    virtual int sub(int x, int y) const;
+    virtual ValuePtr minor(int x, int y) const;
+    virtual int det() const;
     virtual std::vector<ValuePtr> toVector() const;
-    virtual std::vector<ValuePtr> listToVector() const;
-    virtual int listLength() const;
+    virtual std::vector<ValuePtr> asList() const;
+    virtual std::vector<ValuePtr> asRow() const;
     virtual std::optional<std::string> asSymbol() const;
     virtual double asNumber() const;
     virtual ValuePtr getCar() const;
@@ -97,11 +106,20 @@ public:
     PairValue(ValuePtr l, ValuePtr r): 
         car(std::move(l)), cdr(std::move(r)) {}
     bool isList() const;
+    bool isMatrix() const;
     std::string toString() const override;
     std::string getType() const override;
+    int length() const;
+    ValuePtr shape() const;
+    void checkRange(int x, int y) const;
+    int rowNum() const;
+    int colNum() const;
+    int sub(int x, int y) const;
+    ValuePtr minor(int x, int y) const;
+    int det() const;
     std::vector<ValuePtr> toVector() const;
-    std::vector<ValuePtr> listToVector() const;
-    int listLength() const;
+    std::vector<ValuePtr> asList() const;
+    std::vector<ValuePtr> asRow() const;
     ValuePtr getCar() const;
     ValuePtr getCdr() const;
 };

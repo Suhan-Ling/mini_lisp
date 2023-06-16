@@ -114,7 +114,7 @@ ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     ValuePtr result = std::make_shared<NilValue>();
     std::vector<ValuePtr> list;
     for (auto i: args) {
-        list = i->listToVector();
+        list = i->asList();
         operandsLengthCheck(list.size(), 1, -1);
         if (list[0]->toString() == "else") {
             if (i != *args.rbegin()) {
@@ -173,7 +173,7 @@ ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     int len = args.size();
     operandsLengthCheck(len, 2, -1);
     EnvPtr envChild = EvalEnv::createChild(env.shared_from_this());
-    std::vector<ValuePtr> params = args[0]->listToVector();
+    std::vector<ValuePtr> params = args[0]->asList();
     for (auto i: params) {
         std::vector<ValuePtr> bond = i->toVector();
         operandsLengthCheck(bond.size(), 2, -1);

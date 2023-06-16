@@ -19,19 +19,19 @@
 #include "rjsj_test.hpp"
 
 struct TestCtx {
-    EnvPtr env = EvalEnv::createGlobal();
+    EnvPtr envptr = EvalEnv::createGlobal();
     std::string eval(std::string input) {
         auto tokens = Tokenizer::tokenize(input);
         Parser parser(std::move(tokens));
         auto value = parser.parse();
-        auto result = env->eval(std::move(value));
+        auto result = envptr->eval(std::move(value));
         return result->toString();
     }
 };
 
 int main(int argc, char* argv[]) {
     // RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
-    EnvPtr env = EvalEnv::createGlobal();
+    EnvPtr envptr = EvalEnv::createGlobal();
     bool repl = isatty(fileno(stdin));
     while (true) {
         try {
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
             auto tokens = Tokenizer::tokenize(line);
             Parser parser(std::move(tokens)); 
             auto value = parser.parse();
-            auto result = env->eval(std::move(value));  
+            auto result = envptr->eval(std::move(value));  
             if (repl) {
                 std::cout << result->toString() << std::endl;
             }

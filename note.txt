@@ -7,7 +7,7 @@
         将异常统一到Value基类里抛，通过getType()或toString()统一地输出异常内容，避免反复写报错信息；
         用统一、整齐的方式写内置函数和特殊类型的定义，只暴露unordered_map接口；
         用xxxxxxLengthCheck()完成所有参数个数的检查；
-        同类的内置函数复用binaryOperatorFunc(), compareFunc(), listToVector()，listLength()等代码；
+        同类的内置函数复用binaryOperatorFunc(), compareFunc(), asList()，length()等代码；
 3、 类、函数、变量命名方式统一、清晰。
     逻辑结构相似的代码书写结构也相似，让（可能存在的）读者有熟悉感。
 4、 较为简便地实现了一些函数。例如：

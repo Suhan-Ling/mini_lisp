@@ -82,14 +82,10 @@ BuiltinFuncType __log2;
 // matrix
 BuiltinFuncType __matrix;
 BuiltinFuncType __matrix_;
+BuiltinFuncType __asmat;
 BuiltinFuncType __sub;
 BuiltinFuncType __shape;
-// BuiltinFuncType __trans;
-// BuiltinFuncType __det;
-// BuiltinFuncType __minor;
-// BuiltinFuncType __rank;
-// BuiltinFuncType __inv;
-// BuiltinFuncType __eig;
-// BuiltinFuncType __;
+BuiltinFuncType __minor;
+BuiltinFuncType __det;
 
 #endif

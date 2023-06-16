@@ -1,6 +1,7 @@
 #include "./value.h"
 #include "./error.h"
 #include "./eval_env.h"
+#include "./builtins.h"
 
 #include <iomanip>
 #include <cmath>
@@ -49,6 +50,10 @@ bool Value::isList() const {
     return (typeid(*this) == typeid(NilValue));
 }
 
+bool Value::isMatrix() const {
+    return (typeid(*this) == typeid(NilValue));
+}
+
 bool Value::isSelfEvaluating() const {
     return (typeid(*this) == typeid(BooleanValue)) or
            (typeid(*this) == typeid(NumericValue)) or
@@ -57,11 +62,72 @@ bool Value::isSelfEvaluating() const {
            (typeid(*this) == typeid(LambdaValue));
 }
 
+int Value::length() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed list: expected pair or nil, got " +
+                        this->toString());
+    }
+    return 0;
+}
+
+ValuePtr Value::shape() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    return std::make_shared<PairValue>(std::make_shared<NumericValue>(0), 
+                                std::make_shared<NumericValue>(0));
+}
+
+void Value::checkRange(int x, int y) const {
+    throw LispError("Subsript out of range.");
+}
+
+int Value::rowNum() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    return 0;
+}
+
+int Value::colNum() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    return 0;
+}
+
+int Value::sub(int x, int y) const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    throw LispError("Subscript out of range.");
+}
+
+ValuePtr Value::minor(int x, int y) const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    throw LispError("Empty matrix don't have minor.");
+}
+
+int Value::det() const {
+    if (!this->isNil()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    throw LispError("Empty matrix don't have determine.");
+}
+
 std::vector<ValuePtr> Value::toVector() const {
     throw LispError("Cannot convert to vector.");
 }
 
-std::vector<ValuePtr> Value::listToVector() const {
+std::vector<ValuePtr> Value::asList() const {
     if (!this->isNil()) {
         throw LispError("Malformed list: expected pair or nil, got " +
                         this->toString());
@@ -69,12 +135,12 @@ std::vector<ValuePtr> Value::listToVector() const {
     return std::vector<ValuePtr>();
 }
 
-int Value::listLength() const {
+std::vector<ValuePtr> Value::asRow() const {
     if (!this->isNil()) {
-        throw LispError("Malformed list: expected pair or nil, got " +
+        throw LispError("Malformed matrix: expected list, got " +
                         this->toString());
     }
-    return 0;
+    return std::vector<ValuePtr>();
 }
 
 std::optional<std::string> Value::asSymbol() const {
@@ -188,8 +254,147 @@ bool PairValue::isList() const {
     }
 }
 
+bool PairValue::isMatrix() const {
+    if (!this->isList()) {
+        return false;
+    }
+    std::vector<ValuePtr> row = this->asList();
+    std::vector<ValuePtr> list;
+    int len = 0;
+    for (auto i: row) {
+        if (!i->isList()) {
+            return false;
+        }
+        list = i->asList();
+        if ((i != *row.begin()) and (len != list.size())) {
+            return false;
+        }
+        len = list.size();
+        for (auto j: list) {
+            if (!j->isNumber()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 std::string PairValue::getType() const {
     return "PairValue";
+}
+
+int PairValue::length() const {
+    int cnt = 1;
+    ValuePtr cdr = this->cdr;
+    while (1) {
+        if (cdr->isNil()) {
+            break;
+        }
+        if (!cdr->isPair()) {
+            throw LispError("Malformed list: expected pair or nil, got " +
+                            cdr->toString());
+        }
+        cnt++;
+        cdr = cdr->getCdr();
+    }
+    return cnt;
+}
+
+ValuePtr PairValue::shape() const {
+    if (!this->isList()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        this->toString());
+    }
+    std::vector<ValuePtr> row = this->asList();
+    std::vector<ValuePtr> list;
+    int len = 0;
+    for (auto i: row) {
+        if (!i->isList()) {
+            throw LispError("Malformed matrix: expected list, got " +
+                            i->toString());
+        }
+        list = i->asList();
+        if ((i != *row.begin()) and (len != list.size())) {
+            throw LispError("Matrix shape mismatch: expected " + std::to_string(len)
+                            + ", got " + std::to_string(list.size()) + ".");
+        }
+        len = list.size();
+        for (auto j: list) {
+            if (!j->isNumber()) {
+                throw LispError("Malformed matrix: expected number, got " +
+                                j->toString());
+            }
+        }
+    }
+    ValuePtr r, c;
+    r = std::make_shared<NumericValue>(row.size());
+    c = std::make_shared<NumericValue>(len);
+    return std::make_shared<PairValue>(r, c);
+}
+
+void PairValue::checkRange(int x, int y) const {
+    int r = this->rowNum();
+    int c = this->colNum();
+    if ((x < 0) or (x >= r)) {
+        throw LispError("Subscript out of range.");
+    }
+    if ((y < 0) or (y >= c)) {
+        throw LispError("Subscript out of range.");
+    }
+}
+
+int PairValue::rowNum() const {
+    return this->shape()->getCar()->asNumber();
+}
+
+int PairValue::colNum() const {
+    return this->shape()->getCdr()->asNumber();
+}
+
+int PairValue::sub(int x, int y) const {
+    this->checkRange(x, y);
+    std::vector<ValuePtr> row = this->asRow();
+    std::vector<ValuePtr> list = row[x]->asList();
+    return list[y]->asNumber();
+}
+
+ValuePtr PairValue::minor(int x, int y) const {
+    this->checkRange(x, y);
+    std::vector<ValuePtr> row = this->asRow();
+    row.erase(row.begin() + x);
+    for (auto& i: row) {
+        std::vector<ValuePtr> list = i->asList();
+        list.erase(list.begin() + y);
+        ValuePtr cdr = std::make_shared<NilValue>();
+        for (int j = list.size() - 1; j >= 0; j--) {
+            cdr = std::make_shared<PairValue>(list[j], cdr);
+        }
+        i = cdr;
+    }
+    ValuePtr cdr = std::make_shared<NilValue>();
+    for (int j = row.size() - 1; j >= 0; j--) {
+        cdr = std::make_shared<PairValue>(row[j], cdr);
+    }
+    return cdr;
+}
+
+int PairValue::det() const {
+    int len = this->rowNum();
+    if (len != this->colNum()) {
+        throw LispError("Not a square matrix.");
+    }
+    if (len == 1) {
+        return this->getCar()->getCar()->asNumber();
+    }
+    int result = 0;
+    for (int i = 0; i < len; i++) {
+        if (i % 2 == 0) {
+            result += this->sub(0, i) * this->minor(0, i)->det();
+        } else {
+            result -= this->sub(0, i) * this->minor(0, i)->det();
+        }
+    }
+    return result;
 }
 
 std::vector<ValuePtr> PairValue::toVector() const {
@@ -206,7 +411,7 @@ std::vector<ValuePtr> PairValue::toVector() const {
     return result;
 }
 
-std::vector<ValuePtr> PairValue::listToVector() const {
+std::vector<ValuePtr> PairValue::asList() const {
     ValuePtr car;
     ValuePtr cdr = this->cdr;
     std::vector<ValuePtr> result;
@@ -226,21 +431,37 @@ std::vector<ValuePtr> PairValue::listToVector() const {
     return result;
 }
 
-int PairValue::listLength() const {
-    int cnt = 1;
+std::vector<ValuePtr> PairValue::asRow() const {
+    ValuePtr car = this->car;
     ValuePtr cdr = this->cdr;
+    if (!car->isList()) {
+        throw LispError("Malformed matrix: expected list, got " +
+                        car->toString());
+    }
+    int len = car->length();
+    std::vector<ValuePtr> result;
+    result.push_back(car);
     while (1) {
         if (cdr->isNil()) {
             break;
         }
         if (!cdr->isPair()) {
-            throw LispError("Malformed list: expected pair or nil, got " +
-                            cdr->toString());
+            throw LispError("Malformed matrix: expected list, got " +
+                            this->toString());
         }
-        cnt++;
+        car = cdr->getCar();
+        if (!car->isList()) {
+            throw LispError("Malformed matrix: expected list, got " +
+                            car->toString());
+        }
+        if (len != car->length()) {
+            throw LispError("Matrix shape mismatch: expected " + std::to_string(len)
+                            + ", got " + std::to_string(car->length()) + ".");
+        }
         cdr = cdr->getCdr();
+        result.push_back(car);
     }
-    return cnt;
+    return result;
 }
 
 ValuePtr PairValue::getCar() const {
